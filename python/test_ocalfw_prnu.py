@@ -4,9 +4,12 @@ from pylab import *
 
 ## =============================================================================
 ##
-##  Function definitions
+##  Helper functions
 ##
 ## =============================================================================
+
+##______________________________________________________________________________
+##                                                                        my_sin
 
 def my_sin (x,
             a0=0.0,
@@ -16,6 +19,9 @@ def my_sin (x,
     """ Generalized sin function, including offsets and scale factors.
     """
     return a0+a1*np.sin(a2*x+a3)
+
+##______________________________________________________________________________
+##                                                                     plot_grid
 
 def plot_grid ():
     """ Display coordinate grid.
@@ -28,8 +34,11 @@ def plot_grid ():
 
     show()
 
-def spectral_map (image_shape):
-    """ Map for the mapping from detector pixel coordinates (row,col) to
+##______________________________________________________________________________
+##                                                      spectral_calibration_map
+
+def spectral_calibration_map (image_shape):
+    """ Spectral calibration map detector pixel coordinates (row,col) to
         wavelength coordinates.
     """
     print "[spectral_map] Function not yet implemented!"
@@ -57,18 +66,26 @@ signal = signal + swath
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
 pixel_quality = np.array(signal < 0.1, dtype=int)
 
+## Masked array for the signal array
+signal_masked = np.ma.masked_array(signal, mask=pixel_quality)
+signal_selection_masked = signal_masked[selection]
+
 ##______________________________________________________________________________
 ## Print summary
 
-print "-- Shape signal array =", signal.shape, "->", signal.size, "pixels"
-print "-- Shape mask array   =", pixel_quality.shape
-print "-- Selection slices   =", selection
+print "-- Shape signal array .... =", signal.shape, "->", signal.size, "pixels"
+print "-- Shape pixel quality ... =", pixel_quality.shape
+print "-- Masked pixel data ..... =",signal_masked.shape
+print "-- Masked signal selection =", signal_selection_masked.shape
+print "-- Selection slices ...... =", selection
+print "-- Row selection ......... =", selection[0].start, "..", selection[0].stop
+print "-- Column selection ...... =", selection[1].start, "..", selection[1].stop
 
 ##______________________________________________________________________________
 ## Plot generated input data
 
-plt.imshow(signal)
-plt.show()
+#plt.imshow(signal)
+#plt.show()
 
 ## =============================================================================
 ##
@@ -82,31 +99,35 @@ plt.show()
 print "\n[Step 1]\n"
 
 print("--> Allocating normalization arrays...")
-f_norm_row = np.array(selection[0].stop-selection[0].start, 'float32')
-f_norm_col = np.array(selection[1].stop-selection[1].start, 'float32')
+f_norm_row = np.zeros(selection[0].stop-selection[0].start, 'float32')
+f_norm_col = np.zeros(selection[1].stop-selection[1].start, 'float32')
+
+index_row = np.arange(selection[0].start, selection[0].stop, 1)
+index_col = np.arange(selection[1].start, selection[1].stop, 1)
 
 ## Column normalization factor (equation 79a)
 print("--> Computing column normalization factor ...")
-for ncol in range(selection[1].start, selection[1].stop):
-    print "Processing column",ncol,ncol-selection[1].start
-    f_norm_col[ncol-selection[1].start] = signal_selection_masked[:, ncol].mean()
+for ncol in range(len(index_col)):
+    f_norm_col[ncol] = signal_selection_masked[:, ncol].mean()
 
 ## Row normalization factor (equation 79d)
 print("--> Computing row normalization factor ...")
-for nrow in range(selection[0].start, selection[0].stop):
-    print "... processing row", nrow
-    f_norm_row[nrow-selection[0].start] = np.mean(signal_selection_masked[nrow, :]/f_norm_col)
-
+for nrow in range(len(index_row)):
+    f_norm_row[nrow] = np.mean(signal_selection_masked[nrow, :]/f_norm_col)
 
 ## Plot data and normalization values
 
-xvals = np.arange(selection[0].start, selection[0].stop, 1)
-yvals = np.arange(selection[1].start, selection[1].stop, 1)
-
-plt.plot(yvals, f_norm_col, '+-')
+plt.plot(index_row, f_norm_row, '+-')
+plt.xlabel("Column number")
+plt.ylabel("Column normalization factor")
 plt.show()
 
-plt.imshow(signal_selection)
+plt.plot(index_col, f_norm_col, '+-')
+plt.xlabel("Row number")
+plt.ylabel("Row normalization factor")
+plt.show()
+
+plt.imshow(signal[selection])
 plt.show()
 
 ## Print summary for this step
@@ -114,8 +135,6 @@ print "[Step 1] Summary:"
 print "-- signal_selection_masked =", signal_selection_masked.shape
 print "-- f_norm_row shape ...... =", f_norm_row.shape
 print "-- f_norm_col shape ...... =", f_norm_col.shape
-print "-- xvals ................. =", np.min(xvals), "..", np.max(xvals)
-print "-- yvals ................. =", np.min(yvals), "..", np.max(yvals)
 
 ##______________________________________________________________________________
 ## Step 2: Removal of smile effect by re-gridding the columns to wavelength grid
@@ -123,7 +142,7 @@ print "-- yvals ................. =", np.min(yvals), "..", np.max(yvals)
 print "\n[Step 2]\n"
 
 ## Get the spectral map
-spectralimage_map = spectral_map(image_area)
+spectralimage_map = spectral_calibration_map(image_area)
 
 ##______________________________________________________________________________
 ## Step 3: Correct for variations in spectral intensity
