@@ -4,23 +4,38 @@ from pylab import *
 
 ## =============================================================================
 ##
-##  Helper functions
+##  Data containers
 ##
 ## =============================================================================
 
 class Data(object):
+    """ Data object to facilitate passing around input and generated data.
+    """
     def __init__(self, *args, **kwargs):
-        self.image_area = []
-        self.selection  = []
+        """ Initialize object's internal data.
+        """
+        self.image_area = []  ## Image area for full CCD
+        self.selection  = []  ## Image area selection slices
+        self.signal     = []  ## Detector signal for full CCD
+        self.f_norm_row = []  ## Row normalization factor
+        self.f_norm_col = []  ## Column normalization factor
+        self.index_row  = []  ## Row number index for selection
+        self.index_col  = []  ## Column number index for selection
+
+## =============================================================================
+##
+##  Helper functions
+##
+## =============================================================================
 
 ##______________________________________________________________________________
-##                                                                        my_sin
+##                                                               generalized_sin
 
-def my_sin (x,
-            a0=0.0,
-            a1=1.0,
-            a2=1.0,
-            a3=0.0):
+def generalized_sin (x,
+                     a0=0.0,
+                     a1=1.0,
+                     a2=1.0,
+                     a3=0.0):
     """ Generalized sin function, including offsets and scale factors.
     """
     return a0+a1*np.sin(a2*x+a3)
@@ -31,7 +46,20 @@ def my_sin (x,
 def plots_step1 (data):
     """ Generate diagnostics plots for PRNU step 1.
     """
-    pass
+    print("--> Generating diagnostics plots ...")
+    ## Plot detector signal for the selected region
+    plt.imshow(data.signal[data.selection])
+    plt.show()
+    ## Plot row normalization factor
+    plt.plot(data.index_row, data.f_norm_row, '-')
+    plt.xlabel("Row number")
+    plt.ylabel("Row normalization factor")
+    plt.show()
+    ## Plot column normalization factor
+    plt.plot(data.index_col, data.f_norm_col, '-')
+    plt.xlabel("Column number")
+    plt.ylabel("Column normalization factor")
+    plt.show()
 
 ##______________________________________________________________________________
 ##                                                      spectral_calibration_map
@@ -55,19 +83,19 @@ data.image_area = (1024,600)
 data.selection  = [ slice(100,500), slice(200,500) ]
 
 ## Detector signal including swatch dependent variation
-signal = np.random.rand(data.image_area[0],data.image_area[1])
+data.signal = np.random.rand(data.image_area[0],data.image_area[1])
 swath  = np.random.rand(data.image_area[0],data.image_area[1])
 
 for col in np.arange(data.image_area[1]):
-    swath[:,col] = my_sin(col, a1=20, a2=2.0/data.image_area[1])
+    swath[:,col] = generalized_sin(col, a1=20, a2=2.0/data.image_area[1])
 
-signal = signal + swath
+data.signal = data.signal + swath
 
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
-pixel_quality = np.array(signal < 0.1, dtype=int)
+pixel_quality = np.array(data.signal < 0.1, dtype=int)
 
 ## Masked array for the signal array
-signal_masked = np.ma.masked_array(signal, mask=pixel_quality)
+signal_masked = np.ma.masked_array(data.signal, mask=pixel_quality)
 signal_selection_masked = signal_masked[data.selection]
 
 ##______________________________________________________________________________
@@ -75,7 +103,7 @@ signal_selection_masked = signal_masked[data.selection]
 
 print "\n[Input data] Summary:\n"
 
-print "-- Shape signal array .... =", signal.shape, "->", signal.size, "pixels"
+print "-- Shape signal array .... =", data.signal.shape, "->", data.signal.size, "pixels"
 print "-- Shape pixel quality ... =", pixel_quality.shape
 print "-- Masked pixel data ..... =",signal_masked.shape
 print "-- Masked signal selection =", signal_selection_masked.shape
@@ -101,52 +129,39 @@ print "-- Column selection ...... =", data.selection[1].start, "..", data.select
 print "\n[Step 1]\n"
 
 print("--> Allocating normalization arrays...")
-f_norm_row = np.zeros(data.selection[0].stop-data.selection[0].start, 'float32')
-f_norm_col = np.zeros(data.selection[1].stop-data.selection[1].start, 'float32')
+data.f_norm_row = np.zeros(data.selection[0].stop-data.selection[0].start, 'float32')
+data.f_norm_col = np.zeros(data.selection[1].stop-data.selection[1].start, 'float32')
 
-index_row = np.arange(data.selection[0].start, data.selection[0].stop, 1)
-index_col = np.arange(data.selection[1].start, data.selection[1].stop, 1)
+data.index_row = np.arange(data.selection[0].start, data.selection[0].stop, 1)
+data.index_col = np.arange(data.selection[1].start, data.selection[1].stop, 1)
 
 ## Column normalization factor (equation 79a)
 
 print("--> Computing column normalization factor ...")
 
-for ncol in range(len(index_col)):
-    f_norm_col[ncol] = signal_selection_masked[:, ncol].mean()
+for ncol in range(len(data.index_col)):
+    data.f_norm_col[ncol] = signal_selection_masked[:, ncol].mean()
 
 ## Row normalization factor (equation 79d)
 
 print("--> Computing row normalization factor ...")
 
-for nrow in range(len(index_row)):
-    f_norm_row[nrow] = np.mean(signal_selection_masked[nrow, :]/f_norm_col)
+for nrow in range(len(data.index_row)):
+    data.f_norm_row[nrow] = np.mean(signal_selection_masked[nrow, :]/data.f_norm_col)
 
 ## Pixel data rown normalization (equation 79e)
 
 print("--> Pixel data rown normalization ...")
 
-signal_row_norm = np.ndarray(shape=(len(index_row),data.image_area[1]), dtype=float)
+signal_row_norm = np.ndarray(shape=(len(data.index_row),data.image_area[1]), dtype=float)
 
-for nrow in range(len(index_row)):
-    signal_row_norm[nrow,:] = signal_masked[nrow, :]/f_norm_row[nrow]
+for nrow in range(len(data.index_row)):
+    signal_row_norm[nrow,:] = signal_masked[nrow, :]/data.f_norm_row[nrow]
     
-## Plot data and normalization values
-
-plt.plot(index_row, f_norm_row, '-')
-plt.xlabel("Column number")
-plt.ylabel("Column normalization factor")
-plt.show()
-
-plt.plot(index_col, f_norm_col, '-')
-plt.xlabel("Row number")
-plt.ylabel("Row normalization factor")
-plt.show()
-
-plt.imshow(signal[data.selection])
-plt.show()
-
 plt.imshow(signal_row_norm)
 plt.show()
+
+plots_step1(data)
 
 ##______________________________________________________________________________
 ## Step 2: Removal of smile effect by re-gridding the columns to wavelength grid
