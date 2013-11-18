@@ -52,14 +52,14 @@ def spectral_calibration_map (image_shape):
 
 ## Definition of areas  (row,col)
 image_area = (1024,600)
-selection  = [ slice(100,500), slice(100,200) ]
+selection  = [ slice(100,500), slice(200,500) ]
 
 ## Detector signal including swatch dependent variation
 signal = np.random.rand(image_area[0],image_area[1])
 swath  = np.random.rand(image_area[0],image_area[1])
 
 for col in np.arange(image_area[1]):
-    swath[:,col] = my_sin(col, a1=20, a2=2.5/image_area[1])
+    swath[:,col] = my_sin(col, a1=20, a2=2.0/image_area[1])
 
 signal = signal + swath
 
