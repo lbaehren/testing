@@ -22,6 +22,16 @@ class Data(object):
         self.index_row  = []  ## Row number index for selection
         self.index_col  = []  ## Column number index for selection
 
+    def setSelection (selection):
+        """ Set image area selection.
+        """
+        if len(selection)==2:
+            self.selection = selection
+            self.f_norm_row = np.zeros(self.selection[0].stop-self.selection[0].start, 'float32')
+            self.f_norm_col = np.zeros(self.selection[1].stop-self.selection[1].start, 'float32')
+            self.index_row = np.arange(self.selection[0].start, self.selection[0].stop, 1)
+            self.index_col = np.arange(self.selection[1].start, self.selection[1].stop, 1)
+
 ## =============================================================================
 ##
 ##  Helper functions
