@@ -130,12 +130,6 @@ plt.show()
 plt.imshow(signal[selection])
 plt.show()
 
-## Print summary for this step
-print "[Step 1] Summary:"
-print "-- signal_selection_masked =", signal_selection_masked.shape
-print "-- f_norm_row shape ...... =", f_norm_row.shape
-print "-- f_norm_col shape ...... =", f_norm_col.shape
-
 ##______________________________________________________________________________
 ## Step 2: Removal of smile effect by re-gridding the columns to wavelength grid
 
