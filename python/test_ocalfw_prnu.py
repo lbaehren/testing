@@ -19,19 +19,19 @@ class Data(object):
         """Image area for full CCD. """
         self.image_area = (1024,600)
         """ Image area selection slices. """
-        self.selection = [ slice(100,500), slice(200,500) ]
+        self._selection = [ slice(100,500), slice(200,500) ]
         """ Detector signal for full CCD. """
-        self.lx_data = np.random.rand(self.image_area[0],self.image_area[1])
+        self._lx_data = np.random.rand(self.image_area[0],self.image_area[1])
         """ Pixel quality mask for full CCD. """
         self.pixel_quality = []
         """ Row normalization factor. """
-        self.f_norm_row = np.zeros(self.selection[0].stop-self.selection[0].start, 'float32')
+        self.f_norm_row = np.zeros(self._selection[0].stop-self._selection[0].start, 'float32')
         """ Column normalization factor. """
-        self.f_norm_col = np.zeros(self.selection[1].stop-self.selection[1].start, 'float32')
+        self.f_norm_col = np.zeros(self._selection[1].stop-self._selection[1].start, 'float32')
         """ Row number index for selection. """
-        self.index_row = np.arange(self.selection[0].start, self.selection[0].stop, 1)
+        self.index_row = np.arange(self._selection[0].start, self._selection[0].stop, 1)
         """ Column number index for selection. """
-        self.index_col = np.arange(self.selection[1].start, self.selection[1].stop, 1)
+        self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
         """ Spectral calibration map. """
         self.csm = []
 
@@ -39,11 +39,11 @@ class Data(object):
         """ Set image area selection.
         """
         if len(selection)==2:
-            self.selection = selection
-            self.f_norm_row = np.zeros(self.selection[0].stop-self.selection[0].start, 'float32')
-            self.f_norm_col = np.zeros(self.selection[1].stop-self.selection[1].start, 'float32')
-            self.index_row = np.arange(self.selection[0].start, self.selection[0].stop, 1)
-            self.index_col = np.arange(self.selection[1].start, self.selection[1].stop, 1)
+            self._selection = selection
+            self.f_norm_row = np.zeros(self._selection[0].stop-self._selection[0].start, 'float32')
+            self.f_norm_col = np.zeros(self._selection[1].stop-self._selection[1].start, 'float32')
+            self.index_row = np.arange(self._selection[0].start, self._selection[0].stop, 1)
+            self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
 
     def swatchMap (self):
         swath = np.random.rand(self.image_area[0], self.image_area[1])
@@ -53,13 +53,13 @@ class Data(object):
 
     def printSummary (self):
         print "\n[Data] Summary of properties:"
-        print "-- Shape signal array .... =", self.lx_data.shape, "->", self.lx_data.size, "pixels"
+        print "-- Shape signal array .... =", self._lx_data.shape, "->", self._lx_data.size, "pixels"
         print "-- Shape pixel quality ... =", self.pixel_quality.shape
         print "-- Masked pixel data ..... =", signal_masked.shape
         print "-- Masked signal selection =", signal_selection_masked.shape
-        print "-- Selection slices ...... =", self.selection
-        print "-- Row selection ......... =", self.selection[0].start, "..", self.selection[0].stop
-        print "-- Column selection ...... =", self.selection[1].start, "..", self.selection[1].stop
+        print "-- Selection slices ...... =", self._selection
+        print "-- Row selection ......... =", self._selection[0].start, "..", self._selection[0].stop
+        print "-- Column selection ...... =", self._selection[1].start, "..", self._selection[1].stop
 
 ## =============================================================================
 ##
