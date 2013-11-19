@@ -24,16 +24,18 @@ class Data(object):
         self.lx_data = np.random.rand(self.image_area[0],self.image_area[1])
         """ Pixel quality mask for full CCD. """
         self.pixel_quality = []
-        """ Row normalization factor. """
+        """ Row normalization factor. Must be floating point to yield non-zero
+            values later on. """
         self.f_norm_row = np.zeros(self.selection[0].stop-self.selection[0].start, 'float32')
-        """ Column normalization factor. """
+        """ Column normalization factor. Must be floating point to yield non-zero
+            values later on. """
         self.f_norm_col = np.zeros(self.selection[1].stop-self.selection[1].start, 'float32')
         """ Row number index for selection. """
         self.index_row = np.arange(self.selection[0].start, self.selection[0].stop, 1)
         """ Column number index for selection. """
         self.index_col = np.arange(self.selection[1].start, self.selection[1].stop, 1)
-        """ Spectral calibration map. """
-        self.csm = []
+        """ Spectral calibration map (SCM). """
+        self.scm = []
 
     def setSelection (self, selection):
         """ Set image area selection.
