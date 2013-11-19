@@ -94,6 +94,18 @@ def Sin (x,
     return a0+a1*np.sin(a2*x+a3)
 
 ##______________________________________________________________________________
+##                                                                    plot_image
+
+def plot_image (imageData,
+                xlabel="Row number",
+                ylabel="Column number"):
+    plt.imshow(imageData)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
+
+
+##______________________________________________________________________________
 ##                                                                   plots_step1
 
 def plots_step1 (data):
@@ -101,10 +113,7 @@ def plots_step1 (data):
     """
     print("--> Generating diagnostics plots ...")
     ## Plot detector signal for the selected region
-    plt.imshow(data._lx_data[data._selection])
-    plt.xlabel("Row number")
-    plt.ylabel("Column number")
-    plt.show()
+    plot_image(data._lx_data[data._selection])
     ## Plot row normalization factor
     plt.plot(data.index_row, data.f_norm_row, '-')
     plt.xlabel("Row number")
@@ -131,18 +140,6 @@ def plots_step3 (data):
     """ Generate diagnostics plots for PRNU step 3.
     """
     print("--> Generating diagnostics plots ...")
-
-##______________________________________________________________________________
-##                                                                    plot_image
-
-def plot_image (imageData,
-                xlabel="Row number",
-                ylabel="Column number"):
-    plt.imshow(imageData)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
 
 ## =============================================================================
 ##
