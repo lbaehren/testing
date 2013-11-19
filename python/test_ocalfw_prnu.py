@@ -16,11 +16,12 @@ class Data(object):
         """
         self.image_area = []  ## Image area for full CCD
         self.selection  = []  ## Image area selection slices
-        self.signal     = []  ## Detector signal for full CCD
+        self.lx_data    = []  ## Detector signal for full CCD
         self.f_norm_row = []  ## Row normalization factor
         self.f_norm_col = []  ## Column normalization factor
         self.index_row  = []  ## Row number index for selection
         self.index_col  = []  ## Column number index for selection
+        self.csm        = []  ## Spectral calibration map
 
     def setSelection (selection):
         """ Set image area selection.
@@ -58,7 +59,7 @@ def plots_step1 (data):
     """
     print("--> Generating diagnostics plots ...")
     ## Plot detector signal for the selected region
-    plt.imshow(data.signal[data.selection])
+    plt.imshow(data.lx_data[data.selection])
     plt.show()
     ## Plot row normalization factor
     plt.plot(data.index_row, data.f_norm_row, '-')
@@ -70,6 +71,22 @@ def plots_step1 (data):
     plt.xlabel("Column number")
     plt.ylabel("Column normalization factor")
     plt.show()
+
+##______________________________________________________________________________
+##                                                                   plots_step2
+
+def plots_step2 (data):
+    """ Generate diagnostics plots for PRNU step 2.
+    """
+    print("--> Generating diagnostics plots ...")
+
+##______________________________________________________________________________
+##                                                                   plots_step3
+
+def plots_step3 (data):
+    """ Generate diagnostics plots for PRNU step 3.
+    """
+    print("--> Generating diagnostics plots ...")
 
 ##______________________________________________________________________________
 ##                                                      spectral_calibration_map
@@ -93,19 +110,19 @@ data.image_area = (1024,600)
 data.selection  = [ slice(100,500), slice(200,500) ]
 
 ## Detector signal including swatch dependent variation
-data.signal = np.random.rand(data.image_area[0],data.image_area[1])
+data.lx_data = np.random.rand(data.image_area[0],data.image_area[1])
 swath  = np.random.rand(data.image_area[0],data.image_area[1])
 
 for col in np.arange(data.image_area[1]):
     swath[:,col] = generalized_sin(col, a1=20, a2=2.0/data.image_area[1])
 
-data.signal = data.signal + swath
+data.lx_data = data.lx_data + swath
 
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
-pixel_quality = np.array(data.signal < 0.1, dtype=int)
+pixel_quality = np.array(data.lx_data < 0.1, dtype=int)
 
 ## Masked array for the signal array
-signal_masked = np.ma.masked_array(data.signal, mask=pixel_quality)
+signal_masked = np.ma.masked_array(data.lx_data, mask=pixel_quality)
 signal_selection_masked = signal_masked[data.selection]
 
 ##______________________________________________________________________________
@@ -113,7 +130,7 @@ signal_selection_masked = signal_masked[data.selection]
 
 print "\n[Input data] Summary:\n"
 
-print "-- Shape signal array .... =", data.signal.shape, "->", data.signal.size, "pixels"
+print "-- Shape signal array .... =", data.lx_data.shape, "->", data.lx_data.size, "pixels"
 print "-- Shape pixel quality ... =", pixel_quality.shape
 print "-- Masked pixel data ..... =",signal_masked.shape
 print "-- Masked signal selection =", signal_selection_masked.shape
