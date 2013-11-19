@@ -2,96 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from pylab import *
-
-## =============================================================================
-##
-##  Data containers
-##
-## =============================================================================
-
-##______________________________________________________________________________
-##                                                                          Data
-
-class Data(object):
-    """ Data object to facilitate passing around input and generated data.
-    """
-    def __init__(self, *args, **kwargs):
-        """ Initialize object's internal data.
-        """
-
-        """Image area for full CCD. """
-        self.image_area = (1024,600)
-        """ Image area selection slices. """
-        self._selection = [ slice(100,500), slice(200,500) ]
-        """ Detector signal for full CCD. """
-        self._lx_data = np.random.rand(self.image_area[0],self.image_area[1])
-        """ Pixel quality mask for full CCD. """
-        self.pixel_quality = []
-        """ Row normalization factor. Must be floating point to yield non-zero
-            values later on. """
-        self.f_norm_row = np.zeros(self._selection[0].stop-self._selection[0].start, 'float32')
-        """ Column normalization factor. Must be floating point to yield non-zero
-            values later on. """
-        self.f_norm_col = np.zeros(self._selection[1].stop-self._selection[1].start, 'float32')
-        """ Row number index for selection. """
-        self.index_row = np.arange(self._selection[0].start, self._selection[0].stop, 1)
-        """ Column number index for selection. """
-        self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
-        """ Spectral calibration map (SCM). """
-        self._scm = []
-
-    def setSelection (self, selection):
-        """ Set image area selection.
-        """
-        if len(selection)==2:
-            self._selection = selection
-            self.f_norm_row = np.zeros(self._selection[0].stop-self._selection[0].start, 'float32')
-            self.f_norm_col = np.zeros(self._selection[1].stop-self._selection[1].start, 'float32')
-            self.index_row = np.arange(self._selection[0].start, self._selection[0].stop, 1)
-            self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
-
-    def swatchMap (self):
-        swath = np.random.rand(self.image_area[0], self.image_area[1])
-        for col in np.arange(self.image_area[1]):
-            swath[:,col] = Sin(col, a1=20, a2=2.0/self.image_area[1])
-        return swath
-
-    def spectralCalibrationMap (self):
-        """ Generate some type of spectral calibration map to provide a mapping
-            from (row,col) to (row,wavelength).
-        """
-        self._scm = np.ndarray(shape=(self.image_area[0], self.image_area[1]))
-        for col in range(self.image_area[1]):
-            self._scm[:,col] = 0.01*col
-        return self._scm
-
-    def printSummary (self):
-        print "\n[Data] Summary of properties:"
-        print "-- Shape signal array .... =", self._lx_data.shape, "->", self._lx_data.size, "pixels"
-        print "-- Shape pixel quality ... =", self.pixel_quality.shape
-        print "-- Masked pixel data ..... =", signal_masked.shape
-        print "-- Masked signal selection =", signal_selection_masked.shape
-        print "-- Selection slices ...... =", self._selection
-        print "-- Row selection ......... =", self._selection[0].start, "..", self._selection[0].stop
-        print "-- Column selection ...... =", self._selection[1].start, "..", self._selection[1].stop
+from data import Data
+from hanning2d import Hanning2D
 
 ## =============================================================================
 ##
 ##  Helper functions
 ##
 ## =============================================================================
-
-##______________________________________________________________________________
-##                                                                           Sin
-
-def Sin (x,
-         a0=0.0,
-         a1=1.0,
-         a2=1.0,
-         a3=0.0):
-    """ Generalized sin function, including offsets and scale factors.
-    """
-    return a0+a1*np.sin(a2*x+a3)
 
 ##______________________________________________________________________________
 ##                                                                    plot_image
@@ -159,8 +77,8 @@ data._lx_data = data._lx_data + swath
 data.pixel_quality = np.array(data._lx_data < 0.1, dtype=int)
 
 ## Masked array for the signal array
-signal_masked = np.ma.masked_array(data._lx_data, mask=data.pixel_quality)
-signal_selection_masked = signal_masked[data._selection]
+data.signal_masked = np.ma.masked_array(data._lx_data, mask=data.pixel_quality)
+data.signal_selection_masked = data.signal_masked[data._selection]
 
 ##______________________________________________________________________________
 ## Print summary
@@ -184,14 +102,14 @@ print "\n[Step 1]\n"
 print("--> Computing column normalization factor ...")
 
 for ncol in range(len(data.index_col)):
-    data.f_norm_col[ncol] = signal_selection_masked[:, ncol].mean()
+    data.f_norm_col[ncol] = data.signal_selection_masked[:, ncol].mean()
 
 ## Row normalization factor (equation 79d)
 
 print("--> Computing row normalization factor ...")
 
 for nrow in range(len(data.index_row)):
-    data.f_norm_row[nrow] = np.mean(signal_selection_masked[nrow, :]/data.f_norm_col)
+    data.f_norm_row[nrow] = np.mean(data.signal_selection_masked[nrow, :]/data.f_norm_col)
 
 ## Pixel data rown normalization (equation 79e)
 
@@ -200,7 +118,7 @@ print("--> Pixel data rown normalization ...")
 signal_row_norm = np.ndarray(shape=(len(data.index_row),data.image_area[1]), dtype=float)
 
 for nrow in range(len(data.index_row)):
-    signal_row_norm[nrow,:] = signal_masked[nrow, :]/data.f_norm_row[nrow]
+    signal_row_norm[nrow,:] = data.signal_masked[nrow, :]/data.f_norm_row[nrow]
     
 plot_image(signal_row_norm)
 
@@ -220,6 +138,24 @@ plot_image(scm)
 ## Step 3: Correct for variations in spectral intensity
 
 print "\n[Step 3]\n"
+
+## 2D Hanning window
+hanning_row = np.hanning(len(data.index_row))
+hanning_col = np.hanning(len(data.index_col))
+hanning2d   = np.ndarray(shape=(len(data.index_row),len(data.index_col)))
+
+for nrow in range(len(data.index_row)):
+    hanning2d[nrow,:] = hanning_col
+
+for ncol in range(len(data.index_col)):
+    hanning2d[:,ncol] = hanning2d[:,ncol]*hanning_row
+
+print "2D Hanning window:"
+print "-- Shape ......... =", hanning2d.shape
+print "-- nof. elements . =", hanning2d.size
+print "-- Sum of elements =", np.sum(hanning2d)
+
+plot_image(hanning2d)
 
 ##______________________________________________________________________________
 ## Step 4 : Removal of high-frequency features
