@@ -24,16 +24,18 @@ class Data(object):
         self._lx_data = np.random.rand(self.image_area[0],self.image_area[1])
         """ Pixel quality mask for full CCD. """
         self.pixel_quality = []
-        """ Row normalization factor. """
+        """ Row normalization factor. Must be floating point to yield non-zero
+            values later on. """
         self.f_norm_row = np.zeros(self._selection[0].stop-self._selection[0].start, 'float32')
-        """ Column normalization factor. """
+        """ Column normalization factor. Must be floating point to yield non-zero
+            values later on. """
         self.f_norm_col = np.zeros(self._selection[1].stop-self._selection[1].start, 'float32')
         """ Row number index for selection. """
         self.index_row = np.arange(self._selection[0].start, self._selection[0].stop, 1)
         """ Column number index for selection. """
         self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
-        """ Spectral calibration map. """
-        self.csm = []
+        """ Spectral calibration map (SCM). """
+        self.scm = []
 
     def setSelection (self, selection):
         """ Set image area selection.
@@ -87,7 +89,7 @@ def plots_step1 (data):
     """
     print("--> Generating diagnostics plots ...")
     ## Plot detector signal for the selected region
-    plt.imshow(data.lx_data[data.selection])
+    plt.imshow(data._lx_data[data._selection])
     plt.show()
     ## Plot row normalization factor
     plt.plot(data.index_row, data.f_norm_row, '-')
@@ -138,14 +140,14 @@ data = Data()
 ## Detector signal including swatch dependent variation
 
 swath = data.swatchMap()
-data.lx_data = data.lx_data + swath
+data._lx_data = data._lx_data + swath
 
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
-data.pixel_quality = np.array(data.lx_data < 0.1, dtype=int)
+data.pixel_quality = np.array(data._lx_data < 0.1, dtype=int)
 
 ## Masked array for the signal array
-signal_masked = np.ma.masked_array(data.lx_data, mask=data.pixel_quality)
-signal_selection_masked = signal_masked[data.selection]
+signal_masked = np.ma.masked_array(data._lx_data, mask=data.pixel_quality)
+signal_selection_masked = signal_masked[data._selection]
 
 ##______________________________________________________________________________
 ## Print summary
