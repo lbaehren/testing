@@ -34,7 +34,7 @@ class Data(object):
         """ Spectral calibration map. """
         self.csm = []
 
-    def setSelection (selection):
+    def setSelection (self, selection):
         """ Set image area selection.
         """
         if len(selection)==2:
@@ -44,11 +44,17 @@ class Data(object):
             self.index_row = np.arange(self.selection[0].start, self.selection[0].stop, 1)
             self.index_col = np.arange(self.selection[1].start, self.selection[1].stop, 1)
 
+    def swatchMap (self):
+        swath = np.random.rand(self.image_area[0], self.image_area[1])
+        for col in np.arange(self.image_area[1]):
+            swath[:,col] = Sin(col, a1=20, a2=2.0/self.image_area[1])
+        return swath
+
     def printSummary (self):
         print "\n[Data] Summary of properties:"
         print "-- Shape signal array .... =", self.lx_data.shape, "->", self.lx_data.size, "pixels"
         print "-- Shape pixel quality ... =", self.pixel_quality.shape
-        print "-- Masked pixel data ..... =",signal_masked.shape
+        print "-- Masked pixel data ..... =", signal_masked.shape
         print "-- Masked signal selection =", signal_selection_masked.shape
         print "-- Selection slices ...... =", self.selection
         print "-- Row selection ......... =", self.selection[0].start, "..", self.selection[0].stop
@@ -61,13 +67,13 @@ class Data(object):
 ## =============================================================================
 
 ##______________________________________________________________________________
-##                                                               generalized_sin
+##                                                                           Sin
 
-def generalized_sin (x,
-                     a0=0.0,
-                     a1=1.0,
-                     a2=1.0,
-                     a3=0.0):
+def Sin (x,
+         a0=0.0,
+         a1=1.0,
+         a2=1.0,
+         a3=0.0):
     """ Generalized sin function, including offsets and scale factors.
     """
     return a0+a1*np.sin(a2*x+a3)
@@ -125,15 +131,12 @@ def spectral_calibration_map (image_shape):
 ##
 ## =============================================================================
 
-## Definition of areas  (row,col)
+## Create data object
 data = Data()
 
 ## Detector signal including swatch dependent variation
-swath = np.random.rand(data.image_area[0],data.image_area[1])
 
-for col in np.arange(data.image_area[1]):
-    swath[:,col] = generalized_sin(col, a1=20, a2=2.0/data.image_area[1])
-
+swath = data.swatchMap()
 data.lx_data = data.lx_data + swath
 
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
