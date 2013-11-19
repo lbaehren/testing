@@ -9,6 +9,9 @@ from pylab import *
 ##
 ## =============================================================================
 
+##______________________________________________________________________________
+##                                                                          Data
+
 class Data(object):
     """ Data object to facilitate passing around input and generated data.
     """
@@ -35,7 +38,7 @@ class Data(object):
         """ Column number index for selection. """
         self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
         """ Spectral calibration map (SCM). """
-        self.scm = []
+        self._scm = []
 
     def setSelection (self, selection):
         """ Set image area selection.
@@ -52,6 +55,15 @@ class Data(object):
         for col in np.arange(self.image_area[1]):
             swath[:,col] = Sin(col, a1=20, a2=2.0/self.image_area[1])
         return swath
+
+    def spectralCalibrationMap (self):
+        """ Generate some type of spectral calibration map to provide a mapping
+            from (row,col) to (row,wavelength).
+        """
+        self._scm = np.ndarray(shape=(self.image_area[0], self.image_area[1]))
+        for col in range(self.image_area[1]):
+            self._scm[:,col] = 0.01*col
+        return self._scm
 
     def printSummary (self):
         print "\n[Data] Summary of properties:"
@@ -90,6 +102,8 @@ def plots_step1 (data):
     print("--> Generating diagnostics plots ...")
     ## Plot detector signal for the selected region
     plt.imshow(data._lx_data[data._selection])
+    plt.xlabel("Row number")
+    plt.ylabel("Column number")
     plt.show()
     ## Plot row normalization factor
     plt.plot(data.index_row, data.f_norm_row, '-')
@@ -119,14 +133,16 @@ def plots_step3 (data):
     print("--> Generating diagnostics plots ...")
 
 ##______________________________________________________________________________
-##                                                      spectral_calibration_map
+##                                                                    plot_image
 
-def spectral_calibration_map (image_shape):
-    """ Spectral calibration map detector pixel coordinates (row,col) to
-        wavelength coordinates.
-    """
-    print "[spectral_map] Function not yet implemented!"
-    print "-- Image shape = ", image_shape
+def plot_image (imageData,
+                xlabel="Row number",
+                ylabel="Column number"):
+    plt.imshow(imageData)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
+
 
 ## =============================================================================
 ##
@@ -189,8 +205,7 @@ signal_row_norm = np.ndarray(shape=(len(data.index_row),data.image_area[1]), dty
 for nrow in range(len(data.index_row)):
     signal_row_norm[nrow,:] = signal_masked[nrow, :]/data.f_norm_row[nrow]
     
-plt.imshow(signal_row_norm)
-plt.show()
+plot_image(signal_row_norm)
 
 plots_step1(data)
 
@@ -200,7 +215,9 @@ plots_step1(data)
 print "\n[Step 2]\n"
 
 ## Get the spectral map
-spectralimage_map = spectral_calibration_map(data.image_area)
+scm = data.spectralCalibrationMap()
+
+plot_image(scm)
 
 ##______________________________________________________________________________
 ## Step 3: Correct for variations in spectral intensity
