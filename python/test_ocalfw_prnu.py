@@ -14,14 +14,25 @@ class Data(object):
     def __init__(self, *args, **kwargs):
         """ Initialize object's internal data.
         """
-        self.image_area = []  ## Image area for full CCD
-        self.selection  = []  ## Image area selection slices
-        self.lx_data    = []  ## Detector signal for full CCD
-        self.f_norm_row = []  ## Row normalization factor
-        self.f_norm_col = []  ## Column normalization factor
-        self.index_row  = []  ## Row number index for selection
-        self.index_col  = []  ## Column number index for selection
-        self.csm        = []  ## Spectral calibration map
+
+        """Image area for full CCD. """
+        self.image_area = (1024,600)
+        """ Image area selection slices. """
+        self.selection = [ slice(100,500), slice(200,500) ]
+        """ Detector signal for full CCD. """
+        self.lx_data = np.random.rand(self.image_area[0],self.image_area[1])
+        """ Pixel quality mask for full CCD. """
+        self.pixel_quality = []
+        """ Row normalization factor. """
+        self.f_norm_row = np.zeros(self.selection[0].stop-self.selection[0].start, 'float32')
+        """ Column normalization factor. """
+        self.f_norm_col = np.zeros(self.selection[1].stop-self.selection[1].start, 'float32')
+        """ Row number index for selection. """
+        self.index_row = np.arange(self.selection[0].start, self.selection[0].stop, 1)
+        """ Column number index for selection. """
+        self.index_col = np.arange(self.selection[1].start, self.selection[1].stop, 1)
+        """ Spectral calibration map. """
+        self.csm = []
 
     def setSelection (selection):
         """ Set image area selection.
@@ -32,6 +43,16 @@ class Data(object):
             self.f_norm_col = np.zeros(self.selection[1].stop-self.selection[1].start, 'float32')
             self.index_row = np.arange(self.selection[0].start, self.selection[0].stop, 1)
             self.index_col = np.arange(self.selection[1].start, self.selection[1].stop, 1)
+
+    def printSummary (self):
+        print "\n[Data] Summary of properties:"
+        print "-- Shape signal array .... =", self.lx_data.shape, "->", self.lx_data.size, "pixels"
+        print "-- Shape pixel quality ... =", self.pixel_quality.shape
+        print "-- Masked pixel data ..... =",signal_masked.shape
+        print "-- Masked signal selection =", signal_selection_masked.shape
+        print "-- Selection slices ...... =", self.selection
+        print "-- Row selection ......... =", self.selection[0].start, "..", self.selection[0].stop
+        print "-- Column selection ...... =", self.selection[1].start, "..", self.selection[1].stop
 
 ## =============================================================================
 ##
@@ -106,12 +127,9 @@ def spectral_calibration_map (image_shape):
 
 ## Definition of areas  (row,col)
 data = Data()
-data.image_area = (1024,600)
-data.selection  = [ slice(100,500), slice(200,500) ]
 
 ## Detector signal including swatch dependent variation
-data.lx_data = np.random.rand(data.image_area[0],data.image_area[1])
-swath  = np.random.rand(data.image_area[0],data.image_area[1])
+swath = np.random.rand(data.image_area[0],data.image_area[1])
 
 for col in np.arange(data.image_area[1]):
     swath[:,col] = generalized_sin(col, a1=20, a2=2.0/data.image_area[1])
@@ -119,24 +137,16 @@ for col in np.arange(data.image_area[1]):
 data.lx_data = data.lx_data + swath
 
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
-pixel_quality = np.array(data.lx_data < 0.1, dtype=int)
+data.pixel_quality = np.array(data.lx_data < 0.1, dtype=int)
 
 ## Masked array for the signal array
-signal_masked = np.ma.masked_array(data.lx_data, mask=pixel_quality)
+signal_masked = np.ma.masked_array(data.lx_data, mask=data.pixel_quality)
 signal_selection_masked = signal_masked[data.selection]
 
 ##______________________________________________________________________________
 ## Print summary
 
-print "\n[Input data] Summary:\n"
-
-print "-- Shape signal array .... =", data.lx_data.shape, "->", data.lx_data.size, "pixels"
-print "-- Shape pixel quality ... =", pixel_quality.shape
-print "-- Masked pixel data ..... =",signal_masked.shape
-print "-- Masked signal selection =", signal_selection_masked.shape
-print "-- Selection slices ...... =", data.selection
-print "-- Row selection ......... =", data.selection[0].start, "..", data.selection[0].stop
-print "-- Column selection ...... =", data.selection[1].start, "..", data.selection[1].stop
+data.printSummary()
 
 ##______________________________________________________________________________
 ## Plot generated input data
@@ -154,13 +164,6 @@ print "-- Column selection ...... =", data.selection[1].start, "..", data.select
 ## Step 1: Remove swath dependent signal variations
 
 print "\n[Step 1]\n"
-
-print("--> Allocating normalization arrays...")
-data.f_norm_row = np.zeros(data.selection[0].stop-data.selection[0].start, 'float32')
-data.f_norm_col = np.zeros(data.selection[1].stop-data.selection[1].start, 'float32')
-
-data.index_row = np.arange(data.selection[0].start, data.selection[0].stop, 1)
-data.index_col = np.arange(data.selection[1].start, data.selection[1].stop, 1)
 
 ## Column normalization factor (equation 79a)
 
