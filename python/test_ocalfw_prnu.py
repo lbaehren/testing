@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.interpolate import griddata
 from pylab import *
 
 ## =============================================================================
@@ -151,11 +152,6 @@ signal_selection_masked = signal_masked[data.selection]
 
 data.printSummary()
 
-##______________________________________________________________________________
-## Plot generated input data
-
-#plt.imshow(signal)
-#plt.show()
 
 ## =============================================================================
 ##
@@ -207,3 +203,21 @@ spectralimage_map = spectral_calibration_map(data.image_area)
 ##______________________________________________________________________________
 ## Step 3: Correct for variations in spectral intensity
 
+print "\n[Step 3]\n"
+
+##______________________________________________________________________________
+## Step 4 : Removal of high-frequency features
+
+print "\n[Step 4]\n"
+
+##______________________________________________________________________________
+## Step 5 : Re-introduction of high-frequency variations
+
+##______________________________________________________________________________
+## Step 6 : Re-gridding to Detector grid
+
+##______________________________________________________________________________
+## Step 7 : Inverse normalization of row intensities
+
+##______________________________________________________________________________
+## Step 8 : Calculate PRNU CKD
