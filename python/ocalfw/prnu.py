@@ -37,11 +37,13 @@ def image2pdf(imageData,
 ##______________________________________________________________________________
 ##                                                                   plots_step1
 
-def plots_step1 (data):
+def plots_step1 (data,
+                 outfile='plots_prnu_step1.pdf'):
     """ Generate diagnostics plots for PRNU step 1.
     """
-    print("--> Generating diagnostics plots ...")
-    pdf_pages = PdfPages('plots_prnu_step1.pdf')
+    print("--> Generating diagnostics plots for step 1 ...")
+    # Create new PDF document
+    pdf_pages = PdfPages(outfile)
     ## Plot row normalization factor
     fig = plt.figure ()
     plt.plot(data.index_row, data.f_norm_row, '-')
@@ -66,24 +68,76 @@ def plots_step1 (data):
     plt.ylabel("Row number")
     pdf_pages.savefig(fig)
     plt.close()
+    ## Row normalized detector signal
+    fig = plt.figure ()
+    plt.imshow(data._signal_row_norm)
+    plt.title("Row normalized detector signal")
+    plt.xlabel("Column number")
+    plt.ylabel("Row number")
+    pdf_pages.savefig(fig)
+    plt.close()
     # Write the PDF document to the disk
     pdf_pages.close()
 
 ##______________________________________________________________________________
 ##                                                                   plots_step2
 
-def plots_step2 (data):
+def plots_step2 (data,
+                 outfile='plots_prnu_step2.pdf'):
     """ Generate diagnostics plots for PRNU step 2.
     """
-    print("--> Generating diagnostics plots ...")
+    print("--> Generating diagnostics plots for step 2 ...")
+    # Create new PDF document
+    pdf_pages = PdfPages(outfile)
+    # Plot spectral calibration map
+    fig = plt.figure ()
+    plt.imshow(data._scm)
+    plt.title("Spectral calibration map")
+    plt.xlabel("Column number")
+    plt.ylabel("Row number")
+    pdf_pages.savefig(fig)
+    plt.close()
+    # Write the PDF document to the disk
+    pdf_pages.close()
 
 ##______________________________________________________________________________
 ##                                                                   plots_step3
 
-def plots_step3 (data):
+def plots_step3 (data,
+                 outfile='plots_prnu_step3.pdf'):
     """ Generate diagnostics plots for PRNU step 3.
     """
     print("--> Generating diagnostics plots ...")
+    # Create new PDF document
+    pdf_pages = PdfPages(outfile)
+    # Write the PDF document to the disk
+    pdf_pages.close()
+
+##______________________________________________________________________________
+##                                                                   plots_step4
+
+def plots_step4 (data,
+                 outfile='plots_prnu_step4.pdf'):
+    """ Generate diagnostics plots for PRNU step 4.
+    """
+    print("--> Generating diagnostics plots ...")
+    # Create new PDF document
+    pdf_pages = PdfPages(outfile)
+    # Write the PDF document to the disk
+    pdf_pages.close()
+
+##______________________________________________________________________________
+##                                                                   plots_step5
+
+def plots_step5 (data,
+                 outfile='plots_prnu_step5.pdf'):
+    """ Generate diagnostics plots for PRNU step 5.
+    """
+    print("--> Generating diagnostics plots ...")
+    # Create new PDF document
+    pdf_pages = PdfPages(outfile)
+    # Write the PDF document to the disk
+    pdf_pages.close()
 
 ## =============================================================================
 ##
@@ -143,14 +197,10 @@ for nrow in range(len(data.index_row)):
 
 print("--> Pixel data rown normalization ...")
 
-signal_row_norm = np.ndarray(shape=(len(data.index_row),data.image_area[1]), dtype=float)
-
 for nrow in range(len(data.index_row)):
-    signal_row_norm[nrow,:] = data.signal_masked[nrow, :]/data.f_norm_row[nrow]
+    data._signal_row_norm[nrow,:] = data.signal_masked[nrow, :]/data.f_norm_row[nrow]
     
 plots_step1(data)
-
-image2pdf(signal_row_norm, "plot_signal_row_norm.pdf", "Row normalized detector signal")
 
 ##______________________________________________________________________________
 ## Step 2: Removal of smile effect by re-gridding the columns to wavelength grid
@@ -160,7 +210,7 @@ print "\n[Step 2]\n"
 ## Get the spectral map
 scm = data.spectralCalibrationMap()
 
-image2pdf(scm, "plot_scm.pdf", "Spectral calibration map")
+plots_step2(data)
 
 ##______________________________________________________________________________
 ## Step 3: Correct for variations in spectral intensity

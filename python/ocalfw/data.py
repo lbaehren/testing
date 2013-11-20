@@ -52,6 +52,8 @@ class Data(object):
         self.index_row = np.arange(self._selection[0].start, self._selection[0].stop, 1)
         """ Column number index for selection. """
         self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
+        """ Row normalized detector signal. """
+        self._signal_row_norm = np.ndarray(shape=(len(self.index_row),self.image_area[1]), dtype=float)
         """ Spectral calibration map (SCM). """
         self._scm = []
 
