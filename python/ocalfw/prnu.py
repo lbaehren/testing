@@ -42,24 +42,26 @@ def plots_step1 (data,
     """ Generate diagnostics plots for PRNU step 1.
     """
     print("--> Generating diagnostics plots for step 1 ...")
-    # Create new PDF document
+
+    ## Create new PDF document
     pdf_pages = PdfPages(outfile)
-    ## Plot row normalization factor
+
+    ## Detector signal for full CCD
     fig = plt.figure ()
-    plt.plot(data.index_row, data.f_norm_row, '-')
-    plt.title("Row normalization factor")
-    plt.xlabel("Row number")
-    plt.ylabel("Row normalization factor")
-    pdf_pages.savefig(fig)
-    plt.close()
-    ## Plot column normalization factor
-    fig = plt.figure ()
-    plt.plot(data.index_col, data.f_norm_col, '-')
-    plt.title("Column normalization factor")
+    plt.imshow(data._lx_data)
+    plt.title("Detector signal for full CCD")
     plt.xlabel("Column number")
-    plt.ylabel("Column normalization factor")
+    plt.ylabel("Row number")
     pdf_pages.savefig(fig)
     plt.close()
+
+    ## Histogram of detector signal for full CCD
+    fig = plt.figure ()
+    plt.hist(data._lx_data.flatten(), bins=100, facecolor='g', normed=1)
+    plt.title("Distribution of detector signal values")
+    pdf_pages.savefig(fig)
+    plt.close()
+
     ## Plot detector signal for the selected region
     fig = plt.figure ()
     plt.imshow(data._lx_data[data._selection])
@@ -68,6 +70,25 @@ def plots_step1 (data,
     plt.ylabel("Row number")
     pdf_pages.savefig(fig)
     plt.close()
+
+    ## Plot row normalization factor
+    fig = plt.figure ()
+    plt.plot(data.index_row, data.f_norm_row, '-')
+    plt.title("Row normalization factor")
+    plt.xlabel("Row number")
+    plt.ylabel("Row normalization factor")
+    pdf_pages.savefig(fig)
+    plt.close()
+
+    ## Plot column normalization factor
+    fig = plt.figure ()
+    plt.plot(data.index_col, data.f_norm_col, '-')
+    plt.title("Column normalization factor")
+    plt.xlabel("Column number")
+    plt.ylabel("Column normalization factor")
+    pdf_pages.savefig(fig)
+    plt.close()
+
     ## Row normalized detector signal
     fig = plt.figure ()
     plt.imshow(data._signal_row_norm)
@@ -76,6 +97,14 @@ def plots_step1 (data,
     plt.ylabel("Row number")
     pdf_pages.savefig(fig)
     plt.close()
+
+    ## Histogram for row normalized detector signal
+    fig = plt.figure ()
+    plt.hist(data._signal_row_norm.flatten(), bins=100, facecolor='g', normed=1)
+    plt.title("Distribution of row normalized detector signal")
+    pdf_pages.savefig(fig)
+    plt.close()
+
     # Write the PDF document to the disk
     pdf_pages.close()
 
@@ -243,11 +272,17 @@ print "\n[Step 4]\n"
 ##______________________________________________________________________________
 ## Step 5 : Re-introduction of high-frequency variations
 
+print "\n[Step 5]\n"
+
 ##______________________________________________________________________________
 ## Step 6 : Re-gridding to Detector grid
 
+print "\n[Step 6]\n"
+
 ##______________________________________________________________________________
 ## Step 7 : Inverse normalization of row intensities
+
+print "\n[Step 7]\n"
 
 ##______________________________________________________________________________
 ## Step 8 : Calculate PRNU CKD
