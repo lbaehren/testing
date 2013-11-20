@@ -75,9 +75,11 @@ class Data(object):
         """ Generate some type of spectral calibration map to provide a mapping
             from (row,col) to (row,wavelength).
         """
+        print ("--> Generating scectral calibration map ...")
         self._scm = np.ndarray(shape=(self.image_area[0], self.image_area[1]))
-        for col in range(self.image_area[1]):
-            self._scm[:,col] = 0.01*col
+        for row in range(self.image_area[0]):
+            for col in range(self.image_area[1]):
+                self._scm[row,col] = 0.01*(col+10*cos(0.5*self.image_area[0]-row))
         return self._scm
 
     def printSummary (self):

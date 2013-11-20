@@ -12,16 +12,19 @@ from filters import Hanning2D
 ## =============================================================================
 
 ##______________________________________________________________________________
-##                                                                    plot_image
+##                                                                     image2pdf
 
-def plot_image (imageData,
-                xlabel="Column number",
-                ylabel="Row number"):
+def image2pdf(imageData,
+              outfile,
+              title="Detector image",
+              xlabel="Column number",
+              ylabel="Row number"):
+    """ Plot image data to PDF. """
     plt.imshow(imageData)
+    plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.show()
-
+    plt.savefig(outfile)
 
 ## =============================================================================
 ##
@@ -36,8 +39,6 @@ def plots_step1 (data):
     """ Generate diagnostics plots for PRNU step 1.
     """
     print("--> Generating diagnostics plots ...")
-    ## Plot detector signal for the selected region
-    plot_image(data._lx_data[data._selection])
     ## Plot row normalization factor
     plt.plot(data.index_row, data.f_norm_row, '-')
     plt.xlabel("Row number")
@@ -48,6 +49,10 @@ def plots_step1 (data):
     plt.xlabel("Column number")
     plt.ylabel("Column normalization factor")
     plt.show()
+    ## Plot detector signal for the selected region
+    image2pdf(data._lx_data[data._selection],
+              "plot_lx_data.pdf",
+              "Detector signal selection")
 
 ##______________________________________________________________________________
 ##                                                                   plots_step2
@@ -126,7 +131,7 @@ signal_row_norm = np.ndarray(shape=(len(data.index_row),data.image_area[1]), dty
 for nrow in range(len(data.index_row)):
     signal_row_norm[nrow,:] = data.signal_masked[nrow, :]/data.f_norm_row[nrow]
     
-plot_image(signal_row_norm)
+image2pdf(signal_row_norm, "plot_signal_row_norm.pdf")
 
 plots_step1(data)
 
@@ -138,7 +143,7 @@ print "\n[Step 2]\n"
 ## Get the spectral map
 scm = data.spectralCalibrationMap()
 
-plot_image(scm)
+image2pdf(scm, "plot_scm.pdf", "Spectral calibration map")
 
 ##______________________________________________________________________________
 ## Step 3: Correct for variations in spectral intensity
@@ -161,7 +166,7 @@ print "-- Shape ......... =", hanning2d.shape
 print "-- nof. elements . =", hanning2d.size
 print "-- Sum of elements =", np.sum(hanning2d)
 
-plot_image(hanning2d)
+image2pdf(hanning2d, "plot_hanning2d.pdf",title="2D Hanning window")
 
 ##______________________________________________________________________________
 ## Step 4 : Removal of high-frequency features
