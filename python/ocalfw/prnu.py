@@ -116,9 +116,11 @@ def plots_step2 (data,
     """ Generate diagnostics plots for PRNU step 2.
     """
     print("--> Generating diagnostics plots for step 2 ...")
-    # Create new PDF document
+
+    ## Create new PDF document
     pdf_pages = PdfPages(outfile)
-    # Plot spectral calibration map
+
+    ## Plot spectral calibration map
     fig = plt.figure ()
     plt.imshow(data._scm)
     plt.title("Spectral calibration map")
@@ -126,7 +128,20 @@ def plots_step2 (data,
     plt.ylabel("Row number")
     pdf_pages.savefig(fig)
     plt.close()
-    # Write the PDF document to the disk
+
+    ## Cross-sections through spectral calibration map
+    fig = plt.figure ()
+    plt.plot(data._scm[200,:])
+    plt.plot(data._scm[400,:])
+    plt.plot(data._scm[600,:])
+    plt.plot(data._scm[800,:])
+    plt.title("Spectral calibration map cross-sections")
+    plt.xlabel("Column number")
+    plt.ylabel("Wavelength")
+    pdf_pages.savefig(fig)
+    plt.close()
+
+    ## Write the PDF document to the disk
     pdf_pages.close()
 
 ##______________________________________________________________________________
