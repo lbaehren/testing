@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from pylab import *
@@ -25,6 +26,7 @@ def image2pdf(imageData,
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.savefig(outfile)
+    plt.close()
 
 ## =============================================================================
 ##
@@ -39,20 +41,33 @@ def plots_step1 (data):
     """ Generate diagnostics plots for PRNU step 1.
     """
     print("--> Generating diagnostics plots ...")
+    pdf_pages = PdfPages('plots_prnu_step1.pdf')
     ## Plot row normalization factor
+    fig = plt.figure ()
     plt.plot(data.index_row, data.f_norm_row, '-')
+    plt.title("Row normalization factor")
     plt.xlabel("Row number")
     plt.ylabel("Row normalization factor")
-    plt.show()
+    pdf_pages.savefig(fig)
+    plt.close()
     ## Plot column normalization factor
+    fig = plt.figure ()
     plt.plot(data.index_col, data.f_norm_col, '-')
+    plt.title("Column normalization factor")
     plt.xlabel("Column number")
     plt.ylabel("Column normalization factor")
-    plt.show()
+    pdf_pages.savefig(fig)
+    plt.close()
     ## Plot detector signal for the selected region
-    image2pdf(data._lx_data[data._selection],
-              "plot_lx_data.pdf",
-              "Detector signal selection")
+    fig = plt.figure ()
+    plt.imshow(data._lx_data[data._selection])
+    plt.title("Detector signal selection")
+    plt.xlabel("Column number")
+    plt.ylabel("Row number")
+    pdf_pages.savefig(fig)
+    plt.close()
+    # Write the PDF document to the disk
+    pdf_pages.close()
 
 ##______________________________________________________________________________
 ##                                                                   plots_step2
@@ -79,10 +94,12 @@ def plots_step3 (data):
 ## Create data object
 data = Data()
 
-## Detector signal including swatch dependent variation
+## Detector signal including swath dependent variation
 
 swath = data.swatchMap()
 data._lx_data = data._lx_data + swath
+
+image2pdf(swath, "plot_swath.pdf", "Swath dependent variation")
 
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
 data.pixel_quality = np.array(data._lx_data < 0.1, dtype=int)
@@ -131,9 +148,9 @@ signal_row_norm = np.ndarray(shape=(len(data.index_row),data.image_area[1]), dty
 for nrow in range(len(data.index_row)):
     signal_row_norm[nrow,:] = data.signal_masked[nrow, :]/data.f_norm_row[nrow]
     
-image2pdf(signal_row_norm, "plot_signal_row_norm.pdf")
-
 plots_step1(data)
+
+image2pdf(signal_row_norm, "plot_signal_row_norm.pdf", "Row normalized detector signal")
 
 ##______________________________________________________________________________
 ## Step 2: Removal of smile effect by re-gridding the columns to wavelength grid
