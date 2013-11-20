@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from pylab import *
 from data import Data
-from hanning2d import Hanning2D
+from filters import Hanning2D
 
 ## =============================================================================
 ##
@@ -15,13 +15,19 @@ from hanning2d import Hanning2D
 ##                                                                    plot_image
 
 def plot_image (imageData,
-                xlabel="Row number",
-                ylabel="Column number"):
+                xlabel="Column number",
+                ylabel="Row number"):
     plt.imshow(imageData)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.show()
 
+
+## =============================================================================
+##
+##  Diagnostics plots
+##
+## =============================================================================
 
 ##______________________________________________________________________________
 ##                                                                   plots_step1
