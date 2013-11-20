@@ -17,6 +17,18 @@ def Sin (x,
     """
     return a0+a1*np.sin(a2*x+a3)
 
+def Circle (x,
+            y,
+            x0=0.0,
+            y0=0.0,
+            a0=1.0,
+            a1=1.0,
+            a2=1.0):
+    """ General definition of circle, or rather an ellipse.
+    """
+    r = a0 * np.sqrt(a1*(x-x0)**2 + a2*(y-y0)**2)
+    return r
+
 ## =============================================================================
 ##
 ##  Class definition
@@ -80,8 +92,9 @@ class Data(object):
         print ("--> Generating spectral calibration map ...")
         self._scm = np.ndarray(shape=(self.image_area[0], self.image_area[1]))
         for row in range(self.image_area[0]):
+            rowValue = 0.5*self.image_area[0]-row
             for col in range(self.image_area[1]):
-                self._scm[row,col] = 0.01*(col+10*cos(0.5*self.image_area[0]-row))
+                self._scm[row,col] = Circle(rowValue,2*col, y0=0.5*col, a0=10)
         return self._scm
 
     def printSummary (self):
