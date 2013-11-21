@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from pylab import *
 from data import Data
-from filters import Hanning2D
+from filters import HanningWindow2D
 
 ## =============================================================================
 ##
@@ -261,21 +261,12 @@ plots_step2(data)
 
 print "\n[Step 3]\n"
 
-## 2D Hanning window
-hanning_row = np.hanning(len(data.index_row))
-hanning_col = np.hanning(len(data.index_col))
-hanning2d   = np.ndarray(shape=(len(data.index_row),len(data.index_col)))
-
-for nrow in range(len(data.index_row)):
-    hanning2d[nrow,:] = hanning_col
-
-for ncol in range(len(data.index_col)):
-    hanning2d[:,ncol] = hanning2d[:,ncol]*hanning_row
+hanning2d = HanningWindow2D(data.image_area)
 
 print "2D Hanning window:"
-print "-- Shape ......... =", hanning2d.shape
-print "-- nof. elements . =", hanning2d.size
-print "-- Sum of elements =", np.sum(hanning2d)
+print "-- Shape .................. =", hanning2d.shape
+print "-- nof. elements .......... =", hanning2d.size
+print "-- Sum of filter elements . =", np.sum(hanning2d)
 
 image2pdf(hanning2d, "plot_hanning2d.pdf",title="2D Hanning window")
 
