@@ -255,8 +255,6 @@ data = Data()
 swath = data.swathMap()
 data._lx_data = data._lx_data + swath
 
-image2pdf(swath, "plot_swath.pdf", "Swath dependent variation")
-
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
 data.pixel_quality = np.array(data._lx_data < 0.1, dtype=int)
 

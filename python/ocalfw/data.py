@@ -46,6 +46,8 @@ class Data(object):
         self.image_area = (1024,600)
         """ Image area selection slices. """
         self._selection = [ slice(100,500), slice(200,500) ]
+        """ Swath angle dependent signal variation. """
+        self._swath = np.random.rand(self.image_area[0], self.image_area[1])
         """ Detector signal for full CCD. """
         self._lx_data = np.random.rand(self.image_area[0],self.image_area[1])
         """ Pixel quality mask for full CCD. """
@@ -83,10 +85,9 @@ class Data(object):
 
     def swathMap (self):
         """ Generate map of swath dependent signal variation. """
-        swath = np.random.rand(self.image_area[0], self.image_area[1])
         for col in np.arange(self.image_area[1]):
-            swath[:,col] = Sin(col, a1=20, a2=2.0/self.image_area[1])
-        return swath
+            self._swath[:,col] = Sin(col, a1=20, a2=2.0/self.image_area[1])
+        return self._swath
 
     def spectralCalibrationMap (self):
         """ Generate some type of spectral calibration map to provide a mapping
