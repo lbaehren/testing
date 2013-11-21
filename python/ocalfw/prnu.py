@@ -252,7 +252,7 @@ data = Data()
 
 ## Detector signal including swath dependent variation
 
-swath = data.swatchMap()
+swath = data.swathMap()
 data._lx_data = data._lx_data + swath
 
 image2pdf(swath, "plot_swath.pdf", "Swath dependent variation")

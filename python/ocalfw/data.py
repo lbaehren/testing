@@ -81,7 +81,8 @@ class Data(object):
             self.index_row = np.arange(self._selection[0].start, self._selection[0].stop, 1)
             self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
 
-    def swatchMap (self):
+    def swathMap (self):
+        """ Generate map of swath dependent signal variation. """
         swath = np.random.rand(self.image_area[0], self.image_area[1])
         for col in np.arange(self.image_area[1]):
             swath[:,col] = Sin(col, a1=20, a2=2.0/self.image_area[1])
