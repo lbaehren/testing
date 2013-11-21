@@ -55,7 +55,7 @@ class Data(object):
         """ Spectral calibration map (SCM). """
         self._scm = []
         """ Detector signal for full CCD. """
-        self._lx_data = np.random.rand(self.image_area[0],self.image_area[1])
+        self._signal = np.random.rand(self.image_area[0],self.image_area[1])
         """ Pixel quality mask for full CCD. """
         self.pixel_quality = []
         """ Masked array for the signal array. """
@@ -121,7 +121,7 @@ class Data(object):
 
     def printSummary (self):
         print "\n[Data] Summary of properties:"
-        print "-- Shape signal array .... =", self._lx_data.shape, "->", self._lx_data.size, "pixels"
+        print "-- Shape signal array .... =", self._signal.shape, "->", self._signal.size, "pixels"
         print "-- Shape pixel quality ... =", self.pixel_quality.shape
         print "-- Masked pixel data ..... =", self.signal_masked.shape
         print "-- Masked signal selection =", self.signal_selection_masked.shape

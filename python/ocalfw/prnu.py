@@ -26,7 +26,7 @@ def plots_step1 (data,
 
     ## Detector signal for full CCD
     fig = plt.figure ()
-    plt.imshow(data._lx_data)
+    plt.imshow(data._signal)
     plt.title("Detector signal for full CCD")
     plt.xlabel("Column number")
     plt.ylabel("Row number")
@@ -35,14 +35,14 @@ def plots_step1 (data,
 
     ## Histogram of detector signal for full CCD
     fig = plt.figure ()
-    plt.hist(data._lx_data.flatten(), bins=100, facecolor='g', normed=1)
+    plt.hist(data._signal.flatten(), bins=100, facecolor='g', normed=1)
     plt.title("Distribution of detector signal values")
     pdf_pages.savefig(fig)
     plt.close()
 
     ## Plot detector signal for the selected region
     fig = plt.figure ()
-    plt.imshow(data._lx_data[data._selection])
+    plt.imshow(data._signal[data._selection])
     plt.title("Detector signal selection")
     plt.xlabel("Column number")
     plt.ylabel("Row number")
@@ -240,13 +240,13 @@ data = Data()
 ## Detector signal including swath dependent variation
 
 swath = data.swathMap()
-data._lx_data = data._lx_data + swath
+data._signal = data._signal + swath
 
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
-data.pixel_quality = np.array(data._lx_data < 0.1, dtype=int)
+data.pixel_quality = np.array(data._signal < 0.1, dtype=int)
 
 ## Masked array for the signal array
-data.signal_masked = np.ma.masked_array(data._lx_data, mask=data.pixel_quality)
+data.signal_masked = np.ma.masked_array(data._signal, mask=data.pixel_quality)
 data.signal_selection_masked = data.signal_masked[data._selection]
 
 ##______________________________________________________________________________
