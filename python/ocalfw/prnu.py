@@ -8,28 +8,6 @@ import filters
 
 ## =============================================================================
 ##
-##  Helper functions
-##
-## =============================================================================
-
-##______________________________________________________________________________
-##                                                                     image2pdf
-
-def image2pdf(imageData,
-              outfile,
-              title="Detector image",
-              xlabel="Column number",
-              ylabel="Row number"):
-    """ Plot image data to PDF. """
-    plt.imshow(imageData)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.savefig(outfile)
-    plt.close()
-
-## =============================================================================
-##
 ##  Diagnostics plots
 ##
 ## =============================================================================
