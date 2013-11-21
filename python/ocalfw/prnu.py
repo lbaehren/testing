@@ -41,7 +41,7 @@ def plots_step1 (data,
                  outfile='plots_prnu_step1.pdf'):
     """ Generate diagnostics plots for PRNU step 1.
     """
-    print("--> Generating diagnostics plots for step 1 ...")
+    print("--> Generating diagnostics plots ...")
 
     ## Create new PDF document
     pdf_pages = PdfPages(outfile)
@@ -115,7 +115,7 @@ def plots_step2 (data,
                  outfile='plots_prnu_step2.pdf'):
     """ Generate diagnostics plots for PRNU step 2.
     """
-    print("--> Generating diagnostics plots for step 2 ...")
+    print("--> Generating diagnostics plots ...")
 
     ## Create new PDF document
     pdf_pages = PdfPages(outfile)
@@ -165,8 +165,10 @@ def plots_step4 (data,
     """ Generate diagnostics plots for PRNU step 4.
     """
     print("--> Generating diagnostics plots ...")
+
     # Create new PDF document
     pdf_pages = PdfPages(outfile)
+
     # Write the PDF document to the disk
     pdf_pages.close()
 
@@ -178,8 +180,64 @@ def plots_step5 (data,
     """ Generate diagnostics plots for PRNU step 5.
     """
     print("--> Generating diagnostics plots ...")
+
     # Create new PDF document
     pdf_pages = PdfPages(outfile)
+
+    # Write the PDF document to the disk
+    pdf_pages.close()
+
+##______________________________________________________________________________
+##                                                                   plots_step6
+
+def plots_step6 (data,
+                 outfile='plots_prnu_step6.pdf'):
+    """ Generate diagnostics plots for PRNU step 6.
+    """
+    print("--> Generating diagnostics plots ...")
+
+    # Create new PDF document
+    pdf_pages = PdfPages(outfile)
+
+    # Write the PDF document to the disk
+    pdf_pages.close()
+
+##______________________________________________________________________________
+##                                                                   plots_step7
+
+def plots_step7 (data,
+                 outfile='plots_prnu_step7.pdf'):
+    """ Generate diagnostics plots for PRNU step 7.
+    """
+    print("--> Generating diagnostics plots ...")
+
+    # Create new PDF document
+    pdf_pages = PdfPages(outfile)
+
+    ## Smoothed signal after removal of high-frequency features
+    fig = plt.figure ()
+    plt.imshow(data._signal_smooth)
+    plt.title("Smoothed signal after removal of high-frequency features")
+    plt.xlabel("Column number")
+    plt.ylabel("Row number")
+    pdf_pages.savefig(fig)
+    plt.close()
+
+    # Write the PDF document to the disk
+    pdf_pages.close()
+
+##______________________________________________________________________________
+##                                                                   plots_step8
+
+def plots_step8 (data,
+                 outfile='plots_prnu_step8.pdf'):
+    """ Generate diagnostics plots for PRNU step 8.
+    """
+    print("--> Generating diagnostics plots ...")
+
+    # Create new PDF document
+    pdf_pages = PdfPages(outfile)
+
     # Write the PDF document to the disk
     pdf_pages.close()
 
@@ -221,7 +279,7 @@ data.printSummary()
 ##______________________________________________________________________________
 ## Step 1: Remove swath dependent signal variations
 
-print "\n[Step 1]\n"
+print "\n[Step 1] Remove swath dependent signal variations\n"
 
 ## Column normalization factor (equation 79a)
 
@@ -249,7 +307,7 @@ plots_step1(data)
 ##______________________________________________________________________________
 ## Step 2: Removal of smile effect by re-gridding the columns to wavelength grid
 
-print "\n[Step 2]\n"
+print "\n[Step 2] Removal of smile effect\n"
 
 ## Get the spectral map
 scm = data.spectralCalibrationMap()
@@ -259,27 +317,46 @@ plots_step2(data)
 ##______________________________________________________________________________
 ## Step 3: Correct for variations in spectral intensity
 
-print "\n[Step 3]\n"
+print "\n[Step 3] Correct for variations in spectral intensity\n"
+
+plots_step3(data)
 
 ##______________________________________________________________________________
 ## Step 4 : Removal of high-frequency features
 
-print "\n[Step 4]\n"
+print "\n[Step 4] Removal of high-frequency features\n"
+
+plots_step4(data)
 
 ##______________________________________________________________________________
 ## Step 5 : Re-introduction of high-frequency variations
 
-print "\n[Step 5]\n"
+print "\n[Step 5] Re-introduction of high-frequency variations\n"
+
+plots_step5(data)
 
 ##______________________________________________________________________________
 ## Step 6 : Re-gridding to Detector grid
 
-print "\n[Step 6]\n"
+print "\n[Step 6] Re-gridding to Detector grid\n"
+
+plots_step6(data)
 
 ##______________________________________________________________________________
 ## Step 7 : Inverse normalization of row intensities
 
-print "\n[Step 7]\n"
+print "\n[Step 7] Inverse normalization of row intensities\n"
+
+signal_norm_row_smooth = np.ones(shape=data._signal_row_norm.shape)
+
+for nrow in range(len(data.index_row)):
+    data._signal_smooth[nrow,:] = signal_norm_row_smooth[nrow, :]*data.f_norm_row[nrow]
+
+plots_step7(data)
 
 ##______________________________________________________________________________
 ## Step 8 : Calculate PRNU CKD
+
+print "\n[Step 8] Calculate PRNU CKD\n"
+
+plots_step8(data)

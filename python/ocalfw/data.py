@@ -66,6 +66,8 @@ class Data(object):
         self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
         """ Row normalized detector signal. """
         self._signal_row_norm = np.ndarray(shape=(len(self.index_row),self.image_area[1]), dtype=float)
+        """ Smoothed signal after removal of high-frequency features. """
+        self._signal_smooth = np.ndarray(shape=(len(self.index_row),self.image_area[1]), dtype=float)
         """ Spectral calibration map (SCM). """
         self._scm = []
 
