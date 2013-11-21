@@ -192,7 +192,7 @@ def plots_step7 (data,
     # Create new PDF document
     pdf_pages = PdfPages(outfile)
 
-    ## Smoothed signal after removal of high-frequency features
+    # Smoothed signal after removal of high-frequency features
     fig = plt.figure ()
     plt.imshow(data._signal_smooth)
     plt.title("Smoothed signal after removal of high-frequency features")
@@ -215,6 +215,15 @@ def plots_step8 (data,
 
     # Create new PDF document
     pdf_pages = PdfPages(outfile)
+
+    # PRNU map
+    fig = plt.figure ()
+    plt.imshow(data._prnu)
+    plt.title("PRNU CKD")
+    plt.xlabel("Column number")
+    plt.ylabel("Row number")
+    pdf_pages.savefig(fig)
+    plt.close()
 
     # Write the PDF document to the disk
     pdf_pages.close()

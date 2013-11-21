@@ -38,6 +38,10 @@ def Circle (x,
 class Data(object):
     """ Data object to facilitate passing around input and generated data.
     """
+
+    ##__________________________________________________________________________
+    ##                                                                  __init__
+
     def __init__(self, *args, **kwargs):
         """ Initialize object's internal data.
         """
@@ -48,6 +52,8 @@ class Data(object):
         self._selection = [ slice(100,500), slice(200,500) ]
         """ Swath angle dependent signal variation. """
         self._swath = np.random.rand(self.image_area[0], self.image_area[1])
+        """ Spectral calibration map (SCM). """
+        self._scm = []
         """ Detector signal for full CCD. """
         self._lx_data = np.random.rand(self.image_area[0],self.image_area[1])
         """ Pixel quality mask for full CCD. """
@@ -69,9 +75,12 @@ class Data(object):
         """ Row normalized detector signal. """
         self._signal_row_norm = np.ndarray(shape=(len(self.index_row),self.image_area[1]), dtype=float)
         """ Smoothed signal after removal of high-frequency features. """
-        self._signal_smooth = np.ndarray(shape=(len(self.index_row),self.image_area[1]), dtype=float)
-        """ Spectral calibration map (SCM). """
-        self._scm = []
+        self._signal_smooth = np.ndarray(shape=self._signal_row_norm.shape, dtype=float)
+        """ PRNU map. """
+        self._prnu = np.ndarray(shape=self._signal_row_norm.shape, dtype=float)
+
+    ##__________________________________________________________________________
+    ##                                                              setSelection
 
     def setSelection (self, selection):
         """ Set image area selection.
@@ -83,11 +92,17 @@ class Data(object):
             self.index_row = np.arange(self._selection[0].start, self._selection[0].stop, 1)
             self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
 
+    ##__________________________________________________________________________
+    ##                                                                  swathMap
+
     def swathMap (self):
         """ Generate map of swath dependent signal variation. """
         for col in np.arange(self.image_area[1]):
             self._swath[:,col] = Sin(col, a1=20, a2=2.0/self.image_area[1])
         return self._swath
+
+    ##__________________________________________________________________________
+    ##                                                    spectralCalibrationMap
 
     def spectralCalibrationMap (self):
         """ Generate some type of spectral calibration map to provide a mapping
@@ -100,6 +115,9 @@ class Data(object):
             for col in range(self.image_area[1]):
                 self._scm[row,col] = Circle(rowValue,2*col, y0=0.5*col, a0=10)
         return self._scm
+
+    ##__________________________________________________________________________
+    ##                                                              printSummary
 
     def printSummary (self):
         print "\n[Data] Summary of properties:"
