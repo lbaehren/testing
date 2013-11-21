@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from pylab import *
 from data import Data
-from filters import HanningWindow2D
+import filters
 
 ## =============================================================================
 ##
@@ -260,15 +260,6 @@ plots_step2(data)
 ## Step 3: Correct for variations in spectral intensity
 
 print "\n[Step 3]\n"
-
-hanning2d = HanningWindow2D(data.image_area)
-
-print "2D Hanning window:"
-print "-- Shape .................. =", hanning2d.shape
-print "-- nof. elements .......... =", hanning2d.size
-print "-- Sum of filter elements . =", np.sum(hanning2d)
-
-image2pdf(hanning2d, "plot_hanning2d.pdf",title="2D Hanning window")
 
 ##______________________________________________________________________________
 ## Step 4 : Removal of high-frequency features
