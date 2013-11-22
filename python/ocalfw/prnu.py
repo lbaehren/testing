@@ -111,15 +111,21 @@ def plots_step2 (data,
     pdf_pages.savefig(fig)
     plt.close()
 
-    ## Cross-sections through spectral calibration map
+    ## Plot irregular (row,wavelength) mesh
+    nof_indices = data._selection[0].stop - data._selection[0].start
+    nof_indices *= data._selection[1].stop - data._selection[1].start
+    ri,li = np.indices([nof_indices,nof_indices])
+    count = 0
+    for num_ri in range(len(index_row)):
+        for num_li in range(len(index_col)):
+            ri[count] = index_row[num_ri]
+            li[count] = index_col[numli]
+            count += 1
     fig = plt.figure ()
-    plt.plot(data._scm[200,:])
-    plt.plot(data._scm[400,:])
-    plt.plot(data._scm[600,:])
-    plt.plot(data._scm[800,:])
-    plt.title("Spectral calibration map cross-sections")
-    plt.xlabel("Column number")
-    plt.ylabel("Wavelength")
+    plt.scatter(ri, li, marker='x', c='g', s=2)
+    plt.title("Irregular (row,wavelength) mesh")
+    plt.xlabel("Wavelength")
+    plt.ylabel("Row number")
     pdf_pages.savefig(fig)
     plt.close()
 
