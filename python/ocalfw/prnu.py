@@ -326,7 +326,7 @@ print "\n[Step 2] Removal of smile effect\n"
 ## Get the spectral map
 scm = data.spectralCalibrationMap()
 
-# Compute (row,wavelenght) mesh points based on spectral map
+# Compute (row,wavelength) mesh points based on spectral map
 data._signal_row_wavelength = np.ndarray(shape=[data._signal_row_norm.size,3])
 
 print ("--> Computing (row,wavelength) mesh points ...")
