@@ -30,6 +30,7 @@ def plots_step1 (data,
     plt.title("Detector signal for full CCD")
     plt.xlabel("Column number")
     plt.ylabel("Row number")
+    plt.colorbar()
     pdf_pages.savefig(fig)
     plt.close()
 
@@ -46,6 +47,7 @@ def plots_step1 (data,
     plt.title("Detector signal selection")
     plt.xlabel("Column number")
     plt.ylabel("Row number")
+    plt.colorbar()
     pdf_pages.savefig(fig)
     plt.close()
 
@@ -73,6 +75,7 @@ def plots_step1 (data,
     plt.title("Row normalized detector signal")
     plt.xlabel("Column number")
     plt.ylabel("Row number")
+    plt.colorbar()
     pdf_pages.savefig(fig)
     plt.close()
 
@@ -104,6 +107,7 @@ def plots_step2 (data,
     plt.title("Spectral calibration map")
     plt.xlabel("Column number")
     plt.ylabel("Row number")
+    plt.colorbar()
     pdf_pages.savefig(fig)
     plt.close()
 
@@ -198,6 +202,7 @@ def plots_step7 (data,
     plt.title("Smoothed signal after removal of high-frequency features")
     plt.xlabel("Column number")
     plt.ylabel("Row number")
+    plt.colorbar()
     pdf_pages.savefig(fig)
     plt.close()
 
@@ -222,6 +227,7 @@ def plots_step8 (data,
     plt.title("PRNU CKD")
     plt.xlabel("Column number")
     plt.ylabel("Row number")
+    #    plt.colorbar()
     pdf_pages.savefig(fig)
     plt.close()
 
