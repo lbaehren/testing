@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 from mpl_toolkits.mplot3d import Axes3D
@@ -18,7 +19,8 @@ import filters
 ##                                                                   plots_step1
 
 def plots_step1 (data,
-                 outfile='plots_prnu_step1.pdf'):
+                 outfile='plots_prnu_step1.pdf',
+                 with3d=False):
     """ Generate diagnostics plots for PRNU step 1.
     """
     print("--> Generating diagnostics plots ...")
@@ -95,7 +97,8 @@ def plots_step1 (data,
 ##                                                                   plots_step2
 
 def plots_step2 (data,
-                 outfile='plots_prnu_step2.pdf'):
+                 outfile='plots_prnu_step2.pdf',
+                 with3d=False):
     """ Generate diagnostics plots for PRNU step 2.
     """
     print("--> Generating diagnostics plots ...")
@@ -114,28 +117,34 @@ def plots_step2 (data,
     plt.close()
 
     ## Plot (row,wavelength) mesh points derived from spectral calibration map
-    fig = plt.figure ()
-    plt.scatter(data._signal_row_wavelength[:,1], data._signal_row_wavelength[:,0], marker='x', c='g', s=2)
-    plt.xlabel("Wavelength (x)")
-    plt.ylabel("Row (y)")
-    plt.title("Scatter plot of (row,wavelength) mesh grid")
-    pdf_pages.savefig(fig)
-    plt.close()
+    if (with3d):
+        fig = plt.figure ()
+        plt.scatter(data._signal_row_wavelength[:,1],
+                    data._signal_row_wavelength[:,0],
+                    marker='x',
+                    c='g',
+                    s=2)
+        plt.xlabel("Wavelength (x)")
+        plt.ylabel("Row (y)")
+        plt.title("Scatter plot of (row,wavelength) mesh grid")
+        pdf_pages.savefig(fig)
+        plt.close()
 
     ## Plot detector signal as represented on an irregular (row,wavelength) mesh grid
-    fig = plt.figure()
-    ax  = fig.gca(projection='3d')
-    cmhot = plt.cm.get_cmap("hot")
-    ax.scatter(data._signal_row_wavelength[:,1],
-                data._signal_row_wavelength[:,0],
-                data._signal_row_wavelength[:,2],
-                c=data._signal_row_wavelength[:,2],
-                cmap=cmhot)
-    plt.xlabel("Wavelength (x)")
-    plt.ylabel("Row (y)")
-    plt.title("Signal as function of (row,wavelength)")
-    pdf_pages.savefig(fig)
-    plt.close()
+    if (with3d):
+        fig = plt.figure()
+        ax  = fig.gca(projection='3d')
+        cmhot = plt.cm.get_cmap("hot")
+        ax.scatter(data._signal_row_wavelength[:,1],
+                   data._signal_row_wavelength[:,0],
+                   data._signal_row_wavelength[:,2],
+                   c=data._signal_row_wavelength[:,2],
+                   cmap=cmhot)
+                   plt.xlabel("Wavelength (x)")
+                   plt.ylabel("Row (y)")
+                   plt.title("Signal as function of (row,wavelength)")
+                   pdf_pages.savefig(fig)
+                   plt.close()
 
     ## Write the PDF document to the disk
     pdf_pages.close()
