@@ -140,11 +140,11 @@ def plots_step2 (data,
                    data._signal_row_wavelength[:,2],
                    c=data._signal_row_wavelength[:,2],
                    cmap=cmhot)
-                   plt.xlabel("Wavelength (x)")
-                   plt.ylabel("Row (y)")
-                   plt.title("Signal as function of (row,wavelength)")
-                   pdf_pages.savefig(fig)
-                   plt.close()
+        plt.xlabel("Wavelength (x)")
+        plt.ylabel("Row (y)")
+        plt.title("Signal as function of (row,wavelength)")
+        pdf_pages.savefig(fig)
+        plt.close()
 
     ## Write the PDF document to the disk
     pdf_pages.close()
