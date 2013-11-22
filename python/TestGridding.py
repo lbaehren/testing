@@ -1,4 +1,8 @@
 
+""" Collection of code examples for working with mesh data, which in the general
+    case can be defined on an irregular grid.
+"""
+
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
@@ -74,12 +78,13 @@ def example2 (pdf_pages):
     print ("\n[Example 2]\n")
     nofPoints=100
     # Create indices for x and y axis
-    y,x = np.indices([nofPoints,nofPoints], dtype='float64')
+    y,x = np.indices([nofPoints,nofPoints], dtype='float32')
     # Create function values associated with the mesh points
     z   = np.random.randn(nofPoints,nofPoints)
     yr  = y + np.random.randn(nofPoints,nofPoints)
     xr  = x + np.random.randn(nofPoints,nofPoints)
-    #zn  = griddata(xr.ravel(),yr.ravel(),z.ravel(),x,y)
+    # Re-gridding of data onto regular grid
+    #zn  = griddata(xr.ravel(), yr.ravel(), z.ravel(), x, y)
     #zl  = griddata(xr.ravel(),yr.ravel(),z.ravel(),x,y,interp='linear')
 
     # Plot the grid points
@@ -102,16 +107,16 @@ def example3 (pdf_pages):
     # Get the transformation map
     print ("--> Retrieving transformation map ...")
     m = transformation_map(image_shape)
-    # Arrays holding coordinates of mesh points
-    x,y = np.indices([m.size,m.size])
+    # Array holding coordinates of mesh points
+    points = np.random.rand(m.size, 2)
     # Compute new set up mash points
     print ("--> Computing mesh points after transform ...")
     count = 0
     for ny in range(m.shape[0]):
         for nx in range(m.shape[1]):
-            y[count]  = ny
-            x[count]  = m[ny,nx]
-            count    += 1
+            points[count,0] = ny
+            points[count,1] = m[ny,nx]
+            count          += 1
 
     # Create plot of the transformation map
     print ("--> Creating plot for transformation map ...")
@@ -126,9 +131,9 @@ def example3 (pdf_pages):
     # Plot the grid points
     print ("--> Creating plot for new set of mesh points ...")
     fig = plt.figure ()
-    plt.scatter(x, y, marker='x', c='g', s=2)
-    plt.xlabel("Wavelength")
-    plt.ylabel("Row")
+    plt.scatter(points[:,1], points[:,0], marker='x', c='g', s=2)
+    plt.xlabel("Wavelength (x)")
+    plt.ylabel("Row (y)")
     plt.title("Scatter plot of (row,wavelength) mesh grid")
     pdf_pages.savefig(fig)
     plt.close()
