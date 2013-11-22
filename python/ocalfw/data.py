@@ -54,6 +54,8 @@ class Data(object):
         self._swath = np.random.rand(self.image_area[0], self.image_area[1])
         """ Spectral calibration map (SCM). """
         self._scm = []
+        """ (row,wavelength) mesh points derived from spectral calibration map. """
+        self._signal_row_wavelength = []
         """ Detector signal for full CCD. """
         self._signal = np.random.rand(self.image_area[0],self.image_area[1])
         """ Pixel quality mask for full CCD. """

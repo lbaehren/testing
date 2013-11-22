@@ -1,5 +1,7 @@
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from pylab import *
@@ -111,21 +113,27 @@ def plots_step2 (data,
     pdf_pages.savefig(fig)
     plt.close()
 
-    ## Plot irregular (row,wavelength) mesh
-    nof_indices = data._selection[0].stop - data._selection[0].start
-    nof_indices *= data._selection[1].stop - data._selection[1].start
-    ri,li = np.indices([nof_indices,nof_indices])
-    count = 0
-    for num_ri in range(len(index_row)):
-        for num_li in range(len(index_col)):
-            ri[count] = index_row[num_ri]
-            li[count] = index_col[numli]
-            count += 1
+    ## Plot (row,wavelength) mesh points derived from spectral calibration map
     fig = plt.figure ()
-    plt.scatter(ri, li, marker='x', c='g', s=2)
-    plt.title("Irregular (row,wavelength) mesh")
-    plt.xlabel("Wavelength")
-    plt.ylabel("Row number")
+    plt.scatter(data._signal_row_wavelength[:,1], data._signal_row_wavelength[:,0], marker='x', c='g', s=2)
+    plt.xlabel("Wavelength (x)")
+    plt.ylabel("Row (y)")
+    plt.title("Scatter plot of (row,wavelength) mesh grid")
+    pdf_pages.savefig(fig)
+    plt.close()
+
+    ## Plot detector signal as represented on an irregular (row,wavelength) mesh grid
+    fig = plt.figure()
+    ax  = fig.gca(projection='3d')
+    cmhot = plt.cm.get_cmap("hot")
+    ax.scatter(data._signal_row_wavelength[:,1],
+                data._signal_row_wavelength[:,0],
+                data._signal_row_wavelength[:,2],
+                c=data._signal_row_wavelength[:,2],
+                cmap=cmhot)
+    plt.xlabel("Wavelength (x)")
+    plt.ylabel("Row (y)")
+    plt.title("Signal as function of (row,wavelength)")
     pdf_pages.savefig(fig)
     plt.close()
 
@@ -308,6 +316,21 @@ print "\n[Step 2] Removal of smile effect\n"
 
 ## Get the spectral map
 scm = data.spectralCalibrationMap()
+
+# Compute (row,wavelenght) mesh points based on spectral map
+data._signal_row_wavelength = np.ndarray(shape=[data._signal_row_norm.size,3])
+
+print ("--> Computing (row,wavelength) mesh points ...")
+print " - smc ................. =", scm.shape
+print " - data._signal_row_norm =", data._signal_row_norm.shape
+print " - data.index_row ...... =", min(data.index_row), "...", max(data.index_row)
+count = 0
+for nrow in range(len(data.index_row)):
+    for ncol in range(scm.shape[1]):
+        data._signal_row_wavelength[count,0] = data.index_row[nrow]
+        data._signal_row_wavelength[count,1] = scm[data.index_row[nrow],ncol]
+        data._signal_row_wavelength[count,2] = data._signal_row_norm[nrow,ncol]
+        count          += 1
 
 plots_step2(data)
 
