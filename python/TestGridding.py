@@ -2,34 +2,39 @@ import numpy as np
 from scipy.interpolate import griddata
 import matplotlib as mpl
 
+## Global constants
+
+image_shape = (10,35)
+
 ## =============================================================================
 ##
 ##  Test functions
 ##
 ## =============================================================================
 
-# Create array with the original position coordinates (nrow,ncol)
-detector_dimensions = (10,35)
-data = np.random.rand(detector_dimensions[0],detector_dimensions[1])
-mask = np.ones(data.shape)
+def example1 ():
+    # Create array with the original position coordinates (nrow,ncol)
+    data = np.random.rand(image_shape[0],image_shape[1])
+    mask = np.ones(data.shape)
 
-masked_data = np.ma.masked_array (data, mask=mask)
-selected_data = data[data>0.5]
+    masked_data = np.ma.masked_array (data, mask=mask)
+    selected_data = data[data>0.5]
 
-row_positions = np.array(range(detector_dimensions[0]))
-col_positions = np.array(range(detector_dimensions[1]))
+    row_positions = np.array(range(image_shape[0]))
+    col_positions = np.array(range(image_shape[1]))
 
-# Debugging feedback
-print 'Detector dimensions =', detector_dimensions
-print 'Detector data shape =', data.shape, "->", data.size
-print 'Masked data ....... =', masked_data.shape, "->", masked_data.size
-print 'Selected data ..... =', selected_data.shape
+    # Debugging feedback
+    print 'Detector dimensions =', image_shape
+    print 'Detector data shape =', data.shape, "->", data.size
+    print 'Masked data ....... =', masked_data.shape, "->", masked_data.size
+    print 'Selected data ..... =', selected_data.shape
+
 
 ##
 ## Code example: 2D Interpolation of Large Irregular Grid to Regular Grid
 ##
 
-def example1():
+def example2 ():
     print ("\n[Example 1]\n")
     ## Create indices for x and y axis
     y,x = np.indices([2048,2048],dtype='float64')
@@ -45,4 +50,6 @@ def example1():
 ##
 ## =============================================================================
 
-example1()
+if __name__ == '__main__':
+
+    example1()
