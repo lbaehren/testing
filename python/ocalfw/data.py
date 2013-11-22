@@ -59,7 +59,7 @@ class Data(object):
         """ Detector signal for full CCD. """
         self._signal = np.random.rand(self.image_area[0],self.image_area[1])
         """ Pixel quality mask for full CCD. """
-        self.pixel_quality = []
+        self._pixel_quality = []
         """ Masked array for the signal array. """
         self.signal_masked = []
         """ Masked array for the selection from the signal array. """
@@ -124,7 +124,7 @@ class Data(object):
     def printSummary (self):
         print "\n[Data] Summary of properties:"
         print "-- Shape signal array .... =", self._signal.shape, "->", self._signal.size, "pixels"
-        print "-- Shape pixel quality ... =", self.pixel_quality.shape
+        print "-- Shape pixel quality ... =", self._pixel_quality.shape
         print "-- Masked pixel data ..... =", self.signal_masked.shape
         print "-- Masked signal selection =", self.signal_selection_masked.shape
         print "-- Selection slices ...... =", self._selection

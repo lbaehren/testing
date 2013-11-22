@@ -24,10 +24,10 @@ swath = data.swathMap()
 data._signal = data._signal + swath
 
 ## Pixel quality mask for the full image area (flag pixels with value < 0.1)
-data.pixel_quality = np.array(data._signal < 0.1, dtype=int)
+data._pixel_quality = np.array(data._signal < 0.1, dtype=int)
 
 ## Masked array for the signal array
-data.signal_masked = np.ma.masked_array(data._signal, mask=data.pixel_quality)
+data.signal_masked = np.ma.masked_array(data._signal, mask=data._pixel_quality)
 data.signal_selection_masked = data.signal_masked[data._selection]
 
 ##______________________________________________________________________________
@@ -69,6 +69,13 @@ print("--> Pixel data rown normalization ...")
 
 for nrow in range(len(data.index_row)):
     data._signal_row_norm[nrow,:] = data.signal_masked[nrow, :]/data.f_norm_row[nrow]
+
+## Summary of data array
+print "--> Summary of data arrays:"
+print " - data._signal ........ :", data._signal.shape
+print " - data.f_norm_col ..... :", data.f_norm_col.shape
+print " - data.f_norm_row ..... :", data.f_norm_row.shape
+print " - data._signal_row_norm :", data._signal_row_norm.shape
 
 report.step1(data)
 
