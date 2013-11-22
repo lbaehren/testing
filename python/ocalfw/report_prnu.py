@@ -23,6 +23,8 @@ class ReportPRNU (object):
 
         """ Enable/displable generation of 3D plots. """
         self._with3D = False
+        """ Enable/displable generation of scatter plots. """
+        self._withScatter = False
 
     ##__________________________________________________________________________
     ##                                                                     step1
@@ -136,7 +138,7 @@ class ReportPRNU (object):
         plt.close()
 
         ## Plot (row,wavelength) mesh points derived from spectral calibration map
-        if (self._with3D):
+        if (self._withScatter):
             fig = plt.figure ()
             plt.scatter(data._signal_row_wavelength[:,1],
                         data._signal_row_wavelength[:,0],
@@ -150,7 +152,7 @@ class ReportPRNU (object):
             plt.close()
 
         ## Plot detector signal as represented on an irregular (row,wavelength) mesh grid
-        if (self._with3D):
+        if (self._withScatter):
             fig = plt.figure()
             ax  = fig.gca(projection='3d')
             cmhot = plt.cm.get_cmap("hot")
