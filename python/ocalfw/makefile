@@ -1,6 +1,6 @@
 
-default: prnu.py data.py
-	python prnu.py
+default: prnu.py data.py run.py
+	python run.py
 
 filters: filters.py
 	python filters.py

@@ -78,8 +78,10 @@ class Data(object):
         self._signal_row_norm = np.ndarray(shape=(len(self.index_row),self.image_area[1]), dtype=float)
         """ Smoothed signal after removal of high-frequency features. """
         self._signal_smooth = np.ndarray(shape=self._signal_row_norm.shape, dtype=float)
+        """ Normalization factor for spectral intensity. """
+        self._f_norm_wavelength = np.ones([self.image_area[1]])
         """ PRNU map. """
-        self._prnu = np.ndarray(shape=self._signal_row_norm.shape, dtype=float)
+        self._prnu = np.random.rand(self._signal_row_norm.shape[0],self._signal_row_norm.shape[1])
 
     ##__________________________________________________________________________
     ##                                                              setSelection
@@ -91,8 +93,8 @@ class Data(object):
             self._selection = selection
             self.f_norm_row = np.zeros(self._selection[0].stop-self._selection[0].start, 'float32')
             self.f_norm_col = np.zeros(self._selection[1].stop-self._selection[1].start, 'float32')
-            self.index_row = np.arange(self._selection[0].start, self._selection[0].stop, 1)
-            self.index_col = np.arange(self._selection[1].start, self._selection[1].stop, 1)
+            self.index_row  = np.arange(self._selection[0].start, self._selection[0].stop, 1)
+            self.index_col  = np.arange(self._selection[1].start, self._selection[1].stop, 1)
 
     ##__________________________________________________________________________
     ##                                                                  swathMap

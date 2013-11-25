@@ -39,7 +39,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots for PRNU step 1 ...")
+        print("--> Generating diagnostics plots ...")
 
         ## Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -106,6 +106,26 @@ class ReportPRNU (object):
         pdf_pages.savefig(fig)
         plt.close()
 
+        # Difference between input detector signal and row normalized detector signal
+        diff_signal = np.ndarray(shape=data._signal_row_norm.shape)
+        for nrow in range(len(data.index_row)):
+            diff_signal[nrow, :] = data._signal[data.index_row[nrow], :]-data._signal_row_norm[nrow, :]
+        fig = plt.figure ()
+        plt.imshow(diff_signal)
+        plt.title("Difference between input and row norm. signal")
+        plt.xlabel("Column number")
+        plt.ylabel("Row number")
+        plt.colorbar()
+        pdf_pages.savefig(fig)
+        plt.close()
+
+        # Histogram for difference between input detector signal and row normalized detector signal
+        fig = plt.figure ()
+        plt.hist(diff_signal.flatten(), bins=100, facecolor='b', normed=1)
+        plt.title("Difference between input detector signal and row normalized detector signal")
+        pdf_pages.savefig(fig)
+        plt.close()
+
         # Write the PDF document to the disk
         pdf_pages.close()
 
@@ -122,7 +142,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots for PRNU step 2 ...")
+        print("--> Generating diagnostics plots ...")
 
         ## Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -183,10 +203,20 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots for PRNU step 3 ...")
+        print("--> Generating diagnostics plots ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)
+
+        ## Plot row normalization factor
+        fig = plt.figure ()
+        plt.plot(data._f_norm_wavelength, '-')
+        plt.title("Normalization factor for spectral intensity")
+        plt.xlabel("Row number")
+        plt.ylabel("Normalization factor")
+        pdf_pages.savefig(fig)
+        plt.close()
+
         # Write the PDF document to the disk
         pdf_pages.close()
 
@@ -203,7 +233,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots for PRNU step 4 ...")
+        print("--> Generating diagnostics plots ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -223,7 +253,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots for PRNU step 5 ...")
+        print("--> Generating diagnostics plots ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -243,7 +273,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots for PRNU step 6 ...")
+        print("--> Generating diagnostics plots ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -305,7 +335,14 @@ class ReportPRNU (object):
         plt.title("PRNU CKD")
         plt.xlabel("Column number")
         plt.ylabel("Row number")
-        #    plt.colorbar()
+        plt.colorbar()
+        pdf_pages.savefig(fig)
+        plt.close()
+
+        # Histogram plot of PRNU
+        fig = plt.figure ()
+        plt.hist(data._prnu.flatten(), bins=100, facecolor='g', normed=1)
+        plt.title("Distribution of PRNU CKD values")
         pdf_pages.savefig(fig)
         plt.close()
 

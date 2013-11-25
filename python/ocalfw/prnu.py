@@ -11,142 +11,132 @@ import filters
 
 ## =============================================================================
 ##
-## Preparation of data
+##  Class definition
 ##
 ## =============================================================================
 
-## Create data object
-data = Data()
+class PRNU (object):
 
-## Detector signal including swath dependent variation
+    def __init__(self, *args, **kwargs):
+        """ Initialize object's internal data.
+        """
+        # Create data object
+        self._data = Data()
+        # Detector signal including swath dependent variation
+        swath = self._data.swathMap()
+        self._data._signal = self._data._signal + swath
+        # Pixel quality mask for the full image area (flag pixels with value < 0.1)
+        self._data._pixel_quality = np.array(self._data._signal < 0.1, dtype=int)
+        # Masked array for the signal array
+        self._data.signal_masked = np.ma.masked_array(self._data._signal,
+                                                      mask=self._data._pixel_quality)
+        self._data.signal_selection_masked = self._data.signal_masked[self._data._selection]
 
-swath = data.swathMap()
-data._signal = data._signal + swath
+    ##__________________________________________________________________________
+    ## Step 1: Remove swath dependent signal variations
 
-## Pixel quality mask for the full image area (flag pixels with value < 0.1)
-data._pixel_quality = np.array(data._signal < 0.1, dtype=int)
+    def calc_prnu_step1(self):
+        print ("\n[Step 1] Remove swath dependent signal variations\n")
 
-## Masked array for the signal array
-data.signal_masked = np.ma.masked_array(data._signal, mask=data._pixel_quality)
-data.signal_selection_masked = data.signal_masked[data._selection]
+        # Column normalization factor (equation 79a)
+        print("--> Computing column normalization factor ...")
+        for ncol in range(len(self._data.index_col)):
+            self._data.f_norm_col[ncol] = self._data.signal_selection_masked[:, ncol].mean()
 
-##______________________________________________________________________________
-## Print summary
+        # Row normalization factor (equation 79d)
+        print("--> Computing row normalization factor ...")
+        for nrow in range(len(self._data.index_row)):
+            self._data.f_norm_row[nrow] = np.mean(self._data.signal_selection_masked[nrow, :]/self._data.f_norm_col)
 
-data.printSummary()
+        # Pixel data rown normalization (equation 79e)
+        print("--> Pixel data rown normalization ...")
+        for nrow in range(len(self._data.index_row)):
+            self._data._signal_row_norm[nrow,:] = self._data.signal_masked[nrow, :]/self._data.f_norm_row[nrow]
 
+    ##__________________________________________________________________________
 
-## =============================================================================
-##
-##  PRNU CKD calculation
-##
-## =============================================================================
+    def calc_prnu_step2(self):
+        print ("\n[Step 2] Removal of smile effect\n")
 
-report = ReportPRNU()
+        # Get the spectral map
+        scm = self._data.spectralCalibrationMap()
 
-##______________________________________________________________________________
-## Step 1: Remove swath dependent signal variations
+        # Compute (row,wavelength) mesh points based on spectral map
+        self._data._signal_row_wavelength = np.ndarray(shape=[self._data._signal_row_norm.size,3])
 
-print "\n[Step 1] Remove swath dependent signal variations\n"
+        print ("--> Computing (row,wavelength) mesh points ...")
+        print "  - smc ................. =", scm.shape
+        print "  - data._signal_row_norm =", self._data._signal_row_norm.shape
+        print "  - data.index_row ...... =", min(self._data.index_row), "...", max(self._data.index_row)
 
-## Column normalization factor (equation 79a)
+        count = 0
+        for nrow in range(len(self._data.index_row)):
+            for ncol in range(scm.shape[1]):
+                self._data._signal_row_wavelength[count,0] = self._data.index_row[nrow]
+                self._data._signal_row_wavelength[count,1] = scm[self._data.index_row[nrow],ncol]
+                self._data._signal_row_wavelength[count,2] = self._data._signal_row_norm[nrow,ncol]
+                count          += 1
 
-print("--> Computing column normalization factor ...")
+    ##__________________________________________________________________________
 
-for ncol in range(len(data.index_col)):
-    data.f_norm_col[ncol] = data.signal_selection_masked[:, ncol].mean()
+    def calc_prnu_step3(self):
+        print ("\n[Step 3] Correct for variations in spectral intensity\n")
 
-## Row normalization factor (equation 79d)
+    ##__________________________________________________________________________
 
-print("--> Computing row normalization factor ...")
+    def calc_prnu_step4(self):
+        print ("\n[Step 4] Removal of high-frequency features\n")
 
-for nrow in range(len(data.index_row)):
-    data.f_norm_row[nrow] = np.mean(data.signal_selection_masked[nrow, :]/data.f_norm_col)
+    ##__________________________________________________________________________
 
-## Pixel data rown normalization (equation 79e)
+    def calc_prnu_step5(self):
+        print ("\n[Step 5] Re-introduction of high-frequency variations\n")
 
-print("--> Pixel data rown normalization ...")
+    ##__________________________________________________________________________
 
-for nrow in range(len(data.index_row)):
-    data._signal_row_norm[nrow,:] = data.signal_masked[nrow, :]/data.f_norm_row[nrow]
+    def calc_prnu_step6(self):
+        print ("\n[Step 6] Re-gridding to Detector grid\n")
 
-## Summary of data array
-print "--> Summary of data arrays:"
-print " - data._signal ........ :", data._signal.shape
-print " - data.f_norm_col ..... :", data.f_norm_col.shape
-print " - data.f_norm_row ..... :", data.f_norm_row.shape
-print " - data._signal_row_norm :", data._signal_row_norm.shape
+    ##__________________________________________________________________________
 
-report.step1(data)
+    def calc_prnu_step7(self):
+        print ("\n[Step 7] Inverse normalization of row intensities\n")
 
-##______________________________________________________________________________
-## Step 2: Removal of smile effect by re-gridding the columns to wavelength grid
+        # Temporary data
+        signal_norm_row_smooth = np.ones(shape=self._data._signal_row_norm.shape)
 
-print "\n[Step 2] Removal of smile effect\n"
+        # Apply normalization factor
+        for nrow in range(len(self._data.index_row)):
+            self._data._signal_smooth[nrow,:] = signal_norm_row_smooth[nrow, :]*self._data.f_norm_row[nrow]
 
-## Get the spectral map
-scm = data.spectralCalibrationMap()
+    ##__________________________________________________________________________
 
-# Compute (row,wavelength) mesh points based on spectral map
-data._signal_row_wavelength = np.ndarray(shape=[data._signal_row_norm.size,3])
+    def calc_prnu_step8(self):
+        print ("\n[Step 8] Calculate PRNU CKD\n")
 
-print ("--> Computing (row,wavelength) mesh points ...")
-print " - smc ................. =", scm.shape
-print " - data._signal_row_norm =", data._signal_row_norm.shape
-print " - data.index_row ...... =", min(data.index_row), "...", max(data.index_row)
-count = 0
-for nrow in range(len(data.index_row)):
-    for ncol in range(scm.shape[1]):
-        data._signal_row_wavelength[count,0] = data.index_row[nrow]
-        data._signal_row_wavelength[count,1] = scm[data.index_row[nrow],ncol]
-        data._signal_row_wavelength[count,2] = data._signal_row_norm[nrow,ncol]
-        count          += 1
+    ##__________________________________________________________________________
 
-report.step2(data)
+    def calc_prnu(self):
+        """ Calculate PRNU CKD.
+        """
+        self.calc_prnu_step1()
+        self.calc_prnu_step2()
+        self.calc_prnu_step3()
+        self.calc_prnu_step4()
+        self.calc_prnu_step5()
+        self.calc_prnu_step6()
+        self.calc_prnu_step7()
+        self.calc_prnu_step8()
 
-##______________________________________________________________________________
-## Step 3: Correct for variations in spectral intensity
+    ##__________________________________________________________________________
 
-print "\n[Step 3] Correct for variations in spectral intensity\n"
+    def report_prnu(self):
+        """ Generate plots for reporting.
+        """
+        pass
 
-report.step3(data)
+    ##__________________________________________________________________________
 
-##______________________________________________________________________________
-## Step 4 : Removal of high-frequency features
+    def run(self):
+        self.calc_prnu()
 
-print "\n[Step 4] Removal of high-frequency features\n"
-
-report.step4(data)
-
-##______________________________________________________________________________
-## Step 5 : Re-introduction of high-frequency variations
-
-print "\n[Step 5] Re-introduction of high-frequency variations\n"
-
-report.step5(data)
-
-##______________________________________________________________________________
-## Step 6 : Re-gridding to Detector grid
-
-print "\n[Step 6] Re-gridding to Detector grid\n"
-
-report.step6(data)
-
-##______________________________________________________________________________
-## Step 7 : Inverse normalization of row intensities
-
-print "\n[Step 7] Inverse normalization of row intensities\n"
-
-signal_norm_row_smooth = np.ones(shape=data._signal_row_norm.shape)
-
-for nrow in range(len(data.index_row)):
-    data._signal_smooth[nrow,:] = signal_norm_row_smooth[nrow, :]*data.f_norm_row[nrow]
-
-report.step7(data)
-
-##______________________________________________________________________________
-## Step 8 : Calculate PRNU CKD
-
-print "\n[Step 8] Calculate PRNU CKD\n"
-
-report.step8(data)
