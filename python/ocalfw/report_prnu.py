@@ -24,7 +24,7 @@ class ReportPRNU (object):
         """ Enable/displable generation of 3D plots. """
         self._with3D = False
         """ Enable/displable generation of scatter plots. """
-        self._withScatter = False
+        self._withScatter = True
 
     ##__________________________________________________________________________
     ##                                                                     step1
@@ -39,7 +39,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots ...")
+        print("--> Generating diagnostics plots for step 1 ...")
 
         ## Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -142,7 +142,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots ...")
+        print("--> Generating diagnostics plots for step 2 ...")
 
         ## Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -203,7 +203,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots ...")
+        print("--> Generating diagnostics plots for step 3 ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -233,7 +233,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots ...")
+        print("--> Generating diagnostics plots for step 4 ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -253,7 +253,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots ...")
+        print("--> Generating diagnostics plots for step 5 ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -273,7 +273,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots ...")
+        print("--> Generating diagnostics plots for step 6 ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -293,7 +293,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots for PRNU step 7 ...")
+        print("--> Generating diagnostics plots for step 7 ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)
@@ -324,7 +324,7 @@ class ReportPRNU (object):
             :name outfile: Name of the output file to which the generated plots
                   will be written
         """
-        print("--> Generating diagnostics plots for PRNU step 8 ...")
+        print("--> Generating diagnostics plots for step 8 ...")
 
         # Create new PDF document
         pdf_pages = PdfPages(outfile)

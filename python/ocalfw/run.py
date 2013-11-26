@@ -1,6 +1,5 @@
 from data import Data
 from prnu import PRNU
-from report_prnu import ReportPRNU
 
 ## =============================================================================
 ##

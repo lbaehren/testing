@@ -59,15 +59,12 @@ class PRNU (object):
         print ("\n[Step 2] Removal of smile effect\n")
 
         # Get the spectral map
+        print ("--> Get spectral calibration map ...")
         scm = self._data.spectralCalibrationMap()
 
         # Compute (row,wavelength) mesh points based on spectral map
-        self._data._signal_row_wavelength = np.ndarray(shape=[self._data._signal_row_norm.size,3])
-
         print ("--> Computing (row,wavelength) mesh points ...")
-        print "  - smc ................. =", scm.shape
-        print "  - data._signal_row_norm =", self._data._signal_row_norm.shape
-        print "  - data.index_row ...... =", min(self._data.index_row), "...", max(self._data.index_row)
+        self._data._signal_row_wavelength = np.ndarray(shape=[self._data._signal_row_norm.size,3])
 
         count = 0
         for nrow in range(len(self._data.index_row)):
@@ -133,10 +130,20 @@ class PRNU (object):
     def report_prnu(self):
         """ Generate plots for reporting.
         """
-        pass
+        print ("\n[Reporting]\n")
+        report = ReportPRNU()
+        report.step1(self._data)
+        report.step2(self._data)
+        report.step3(self._data)
+        report.step4(self._data)
+        report.step5(self._data)
+        report.step6(self._data)
+        report.step7(self._data)
+        report.step8(self._data)
 
     ##__________________________________________________________________________
 
     def run(self):
         self.calc_prnu()
+        self.report_prnu()
 
