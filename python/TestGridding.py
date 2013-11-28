@@ -6,7 +6,7 @@
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
-from scipy.interpolate import griddata
+import scipy.interpolate as sip
 
 ## Global constants
 
@@ -17,6 +17,9 @@ image_shape = (10,35)
 ##  Helper functions
 ##
 ## =============================================================================
+
+##______________________________________________________________________________
+##                                                                        Circle
 
 def Circle (x,
             y,
@@ -34,6 +37,29 @@ def Circle (x,
     r = a0 * np.sqrt(a1*(x-x0)**2 + a2*(y-y0)**2)
     return r
 
+##______________________________________________________________________________
+##                                                                        Circle
+
+def Gaussian2D(x,
+               y,
+               x0=0.0,
+               x1=1.0,
+               y0=0.0,
+               y1=1.0,
+               a0=2.0,
+               a1=1.0):
+    """ 2D Gaussian function.
+
+        :param x: x-axis positions of the points where the function is computed.
+        :param y: y-axis positions of the points where the function is computed.
+        :param x0: Offset along the x-axis.
+        :param y0: Offset along the y-axis.
+    """
+    return a0*np.exp(-(x-x0)**2/(2*x1)**2-(y-y0)**2/(2*y1)**2)+a1
+
+##______________________________________________________________________________
+##                                                            transformation_map
+
 def transformation_map(shape):
     """ Generate map for transformation from detector (row,col) to (row,wavelength)
         grid.
@@ -50,6 +76,36 @@ def transformation_map(shape):
 ##  Test functions
 ##
 ## =============================================================================
+
+##______________________________________________________________________________
+##                                                                plot_functions
+
+def plot_functions (pdf_pages,
+                    nofPoints=100):
+    """ Create plots for the various (mathematical functions.
+
+        :param pdf_pages: PDF document for collecting the generated plots.
+        :param nofPoints: Number of points per side of the grid.
+    """
+    positions = np.mgrid[0:nofPoints, 0:nofPoints]
+
+    valGaussian2D = Gaussian2D(positions[0],
+                               positions[1],
+                               x0=nofPoints/2.0,
+                               y0=nofPoints/2.0,
+                               x1=10.0,
+                               y1=10.0)
+    fig = plt.figure ()
+    plt.imshow(valGaussian2D)
+    plt.xlabel("x-axis")
+    plt.ylabel("y-axis")
+    plt.title("gaussian(x,y)")
+    pdf_pages.savefig(fig)
+    plt.close()
+
+
+##______________________________________________________________________________
+##                                                                      example1
 
 def example1 ():
     print ("\n[Example 1]\n")
@@ -69,10 +125,10 @@ def example1 ():
     print '-- Masked data ....... =', masked_data.shape, "->", masked_data.size
     print '-- Selected data ..... =', selected_data.shape
 
-
+##______________________________________________________________________________
+##                                                                      example2
 ##
-## Code example: 2D Interpolation of Large Irregular Grid to Regular Grid
-##
+## 2D Interpolation of Large Irregular Grid to Regular Grid
 
 def example2 (pdf_pages):
     print ("\n[Example 2]\n")
@@ -97,13 +153,14 @@ def example2 (pdf_pages):
     pdf_pages.savefig(fig)
     plt.close()
 
+##______________________________________________________________________________
+##                                                     regrid_transformation_map
 ##
-##  Code example: Generate grid based on transformation map
-##
+## Generate grid based on transformation map
 
-def example3 (pdf_pages):
+def regrid_transformation_map (pdf_pages):
     """ Generate grid based on transformation map. """
-    print ("\n[Example 3]\n")
+    print ("\n[regrid_transformation_map]\n")
     # Get the transformation map
     print ("--> Retrieving transformation map ...")
     m = transformation_map(image_shape)
@@ -152,7 +209,9 @@ if __name__ == '__main__':
     # Run example routines
     example1()
     example2(pdf_pages)
-    example3(pdf_pages)
+    regrid_transformation_map(pdf_pages)
+
+    plot_functions(pdf_pages)
 
     # Write the PDF document to the disk
     pdf_pages.close()
